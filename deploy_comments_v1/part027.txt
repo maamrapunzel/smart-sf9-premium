@@ -1,0 +1,2368 @@
+iew .learner-info-table th.learner-elective-col,
+  #editView .learner-info-table td.learner-elective-col,
+  #editView .studentdash-table-wrap .learner-elective-col,
+  #editView .studentdash-table-wrap th.learner-elective-col,
+  #editView .studentdash-table-wrap td.learner-elective-col{
+    display:none!important;
+    width:0!important;
+    min-width:0!important;
+    max-width:0!important;
+    padding:0!important;
+    border:0!important;
+  }
+</style>
+<script id="studentDataNoElectivesPatchScript">
+(function(){
+  function removeStudentElectiveColumns(){
+    const panel=document.getElementById('editPanel');
+    if(!panel || !panel.querySelector('.studentdash')) return;
+    const table=panel.querySelector('table.learner-info-table');
+    if(!table) return;
+    table.querySelectorAll('.learner-elective-col').forEach(function(el){
+      el.style.display='none';
+      el.style.width='0';
+      el.style.minWidth='0';
+      el.style.maxWidth='0';
+      el.style.padding='0';
+      el.style.border='0';
+    });
+  }
+  ['renderEditor','showEditView'].forEach(function(name){
+    const fn=window[name]; const mark='__noElectives_'+name;
+    if(typeof fn==='function' && !window[mark]){
+      window[name]=function(){ const out=fn.apply(this,arguments); setTimeout(removeStudentElectiveColumns,0); return out; };
+      window[mark]=true;
+    }
+  });
+  document.addEventListener('DOMContentLoaded',function(){ setTimeout(removeStudentElectiveColumns,0); });
+})();
+</script>
+
+<style id="subjectSelectExactPatchStyle">
+  /* Exact-style Subject Select dashboard */
+  #editPanel .subjectdash{display:flex;flex-direction:column;gap:16px;margin-top:4px}
+  #editPanel .subjectdash-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:2px 4px 0}
+  #editPanel .subjectdash-topline .sub-intro{display:flex;align-items:center;gap:14px;min-width:0}
+  #editPanel .subjectdash-topline .sub-icon{width:52px;height:52px;border-radius:50%;background:#ffdbe8;color:#ef4b8b;display:grid;place-items:center;font-size:24px;font-weight:900;flex:0 0 auto}
+  #editPanel .subjectdash-topline h4{margin:0 0 4px;font-size:22px;color:#17191d}
+  #editPanel .subjectdash-topline p{margin:0;color:#746c73;font-size:12px;line-height:1.45}
+  #editPanel .subjectdash-reminder{min-width:380px;max-width:490px;border:1px solid #f1d5df;background:#fff8fb;border-radius:16px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;color:#655963;font-size:11px;line-height:1.45}
+  #editPanel .subjectdash-reminder .i{width:40px;height:40px;border-radius:50%;background:#ffd3e4;color:#ea4d8b;display:grid;place-items:center;font-weight:900;font-size:22px;flex:0 0 auto}
+
+  #editPanel .subjectdash-summary{display:grid;grid-template-columns:minmax(360px,1.2fr) repeat(2,minmax(220px,.6fr));gap:14px}
+  #editPanel .subjectdash-card{border:1px solid #eadde3;background:#fff;border-radius:18px;padding:18px 18px;min-height:92px}
+  #editPanel .subjectdash-select-row{display:grid;grid-template-columns:145px 1fr;gap:14px;align-items:center}
+  #editPanel .subjectdash-select-row label{font:900 13px Arial,sans-serif;color:#17191d}
+  #editPanel .subjectdash-select-row select{width:100%;box-sizing:border-box;border:1px solid #e7dbe0;border-radius:14px;background:#fff;padding:12px 14px;font:700 13px Arial,sans-serif;color:#1a1b20;min-height:48px}
+  #editPanel .subjectdash-statrow{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center}
+  #editPanel .subjectdash-statrow .icon{width:42px;height:42px;border-radius:50%;background:#fff1f6;display:grid;place-items:center;font-size:18px}
+  #editPanel .subjectdash-card:nth-child(2){background:#f7fff9}
+  #editPanel .subjectdash-card:nth-child(3){background:#fbfaff}
+  #editPanel .subjectdash-card:nth-child(2) .icon{background:#effbf2}
+  #editPanel .subjectdash-card:nth-child(3) .icon{background:#f3f1ff}
+  #editPanel .subjectdash-statrow small{display:block;text-transform:uppercase;letter-spacing:.65px;font-size:9px;font-weight:900;color:#6e6270;margin-bottom:4px}
+  #editPanel .subjectdash-statrow strong{display:block;font-size:26px;line-height:1;color:#17191d}
+  #editPanel .subjectdash-statrow span{display:block;font-size:9.4px;color:#82757f;margin-top:4px}
+
+  #editPanel .subjectdash-grid-card{border:1px solid #eadde3;background:#fff;border-radius:18px;padding:18px;overflow:hidden}
+  #editPanel .subjectdash-grid-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+  #editPanel .subjectdash-grid-head .head-icon{width:40px;height:40px;border-radius:50%;background:#ffd8e7;color:#ec3f80;display:grid;place-items:center;flex:0 0 auto;font-size:18px}
+  #editPanel .subjectdash-grid-head h5{margin:0 0 4px;font-size:16px;color:#17191d}
+  #editPanel .subjectdash-grid-head p{margin:0;font-size:11px;color:#827680}
+  #editPanel .subjectdash-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+  #editPanel .subjectdash-item{border:1px solid #f0d3de;background:linear-gradient(180deg,#fff9fc,#fff);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:9px;min-height:134px;transition:.15s ease}
+  #editPanel .subjectdash-item.disabled{opacity:.68;background:#fcfcfc}
+  #editPanel .subjectdash-item.highlight{box-shadow:0 0 0 3px rgba(108,81,201,.12)}
+  #editPanel .subjectdash-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #editPanel .subjectdash-item-code{font:900 15px Arial,sans-serif;color:#17191d;letter-spacing:.2px}
+  #editPanel .subjectdash-item-toggle{width:24px;height:24px;accent-color:#ef4b8b;cursor:pointer}
+  #editPanel .subjectdash-item input[type=text]{width:100%;box-sizing:border-box;border:1px solid #e3d7dd;border-radius:10px;background:#fff;padding:9px 10px;font:700 12px Arial,sans-serif;color:#17191d;outline:none;min-height:36px}
+  #editPanel .subjectdash-item input[type=text]:focus{border-color:#ef4b8b;box-shadow:0 0 0 3px rgba(239,75,139,.10)}
+  #editPanel .subjectdash-item input[type=text]:disabled{background:#f3f1f4;color:#999}
+  #editPanel .subjectdash-tag{display:inline-flex;align-items:center;width:max-content;border-radius:999px;padding:4px 8px;font:800 9px Arial,sans-serif;background:#ffe9f2;color:#ea4d8b}
+  #editPanel .subjectdash-tag.elective{background:#efe9ff;color:#6c51c9}
+  #editPanel .subjectdash-note{font-size:9px;line-height:1.4;color:#857782;min-height:24px}
+  #editPanel .subjectdash-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px}
+  #editPanel .subjectdash-actions{display:flex;gap:10px;flex-wrap:wrap}
+  #editPanel .subjectdash-btn{border:1px solid #e7dbe0;background:#fff;border-radius:14px;padding:13px 18px;font:800 12px Arial,sans-serif;color:#17191d;cursor:pointer}
+  #editPanel .subjectdash-btn:hover{background:#fff7fb}
+  #editPanel .subjectdash-status{margin-left:auto;border-radius:999px;padding:8px 14px;background:#eef8f0;color:#168043;font:800 10px Arial,sans-serif}
+  #editPanel .subjectdash-status.manual{background:#fff5df;color:#9b6a00}
+
+  @media(max-width:1260px){#editPanel .subjectdash-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#editPanel .subjectdash-summary{grid-template-columns:1fr}}
+  @media(max-width:980px){#editPanel .subjectdash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:760px){#editPanel .subjectdash-topline{align-items:flex-start;flex-direction:column}#editPanel .subjectdash-reminder{min-width:0;max-width:none;width:100%;box-sizing:border-box}#editPanel .subjectdash-grid{grid-template-columns:1fr}#editPanel .subjectdash-select-row{grid-template-columns:1fr}}
+</style>
+<script id="subjectSelectExactPatchScript">
+(function(){
+  function escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+  function valAttr(s){ return escHtml(String(s==null?'':s)); }
+  const checks=['filipino','english','mathematics','science','ap','values','tle','mapeh','elective1','elective2'];
+  const codeMap={filipino:'FIL',english:'ENG',mathematics:'MATH',science:'SCI',ap:'AP',values:'GMRC/VE',tle:'EPP/TLE',mapeh:'MAPEH',elective1:'ELECTIVE 1',elective2:'ELECTIVE 2'};
+  const tagMap={filipino:'Subject',english:'Subject',mathematics:'Subject',science:'Subject',ap:'Subject',values:'Subject',tle:'Subject',mapeh:'Subject',elective1:'Elective',elective2:'Elective'};
+
+  function currentStu(){
+    if(typeof currentSubjectSetupSectionKey!=='function' || typeof studentForSubjectSetupKey!=='function') return null;
+    return studentForSubjectSetupKey(currentSubjectSetupSectionKey());
+  }
+  function currentCfg(){
+    const stu=currentStu();
+    if(typeof getSectionSubjectConfig!=='function') return {};
+    return getSectionSubjectConfig(stu)||{};
+  }
+  function ensureAutoPresetForCurrentSection(){
+    if(typeof getSectionSubjectConfig!=='function' || typeof applySubjectPreset!=='function') return;
+    const stu=currentStu();
+    if(!stu) return;
+    const cfg=getSectionSubjectConfig(stu)||{};
+    if(!cfg.__smartSubjectAutoInit){
+      cfg.__smartSubjectAutoInit=true;
+      applySubjectPreset('standard');
+    }
+  }
+  function selectedCount(cfg){ return checks.filter(function(k){ return !!cfg[k]; }).length; }
+  function displayName(stu,k,cfg){
+    if(k==='elective1') return cfg.elective1Name || (typeof sectionSubjectDisplayName==='function' ? sectionSubjectDisplayName(stu,k) : '');
+    if(k==='elective2') return cfg.elective2Name || (typeof sectionSubjectDisplayName==='function' ? sectionSubjectDisplayName(stu,k) : '');
+    return typeof sectionSubjectDisplayName==='function' ? sectionSubjectDisplayName(stu,k) : (cfg[k+'Name']||'');
+  }
+  function placeholder(stu,k){ return typeof gradeAutoSubjectName==='function' ? gradeAutoSubjectName(stu&&stu.grade,k) : ''; }
+  function noteFor(k){ if(k==='mapeh') return 'Music & Arts + PE & Health components remain linked.'; return '&nbsp;'; }
+  function statusHtml(cfg){
+    const manual=cfg.autoGradeLabels===false || checks.some(function(k){ return (k==='elective1'||k==='elective2') ? !!cfg[k+'Name'] : false; });
+    return '<span class="subjectdash-status'+(manual?' manual':'')+'">'+(manual?'— Manual subject labels active':'— Default subject labels active')+'</span>';
+  }
+  function subjectCard(stu,cfg,k){
+    const enabled=!!cfg[k], elective=(k==='elective1'||k==='elective2'), note=noteFor(k), tag=tagMap[k];
+    const cardId='subject-card-'+k;
+    return ''
+      + '<div id="'+cardId+'" class="subjectdash-item'+(enabled?'':' disabled')+'">'
+      +   '<div class="subjectdash-item-top">'
+      +     '<div class="subjectdash-item-code">'+escHtml(codeMap[k]||k.toUpperCase())+'</div>'
+      +     '<input class="subjectdash-item-toggle" type="checkbox" '+(enabled?'checked':'')+' onchange="window.smartSubjectCardToggle(\''+k+'\',this.checked)">'
+      +   '</div>'
+      +   '<input type="text" value="'+valAttr(displayName(stu,k,cfg))+'" placeholder="'+valAttr(placeholder(stu,k)||codeMap[k])+'" onchange="window.smartSubjectNameChange(\''+k+'\',this.value)" '+((elective&&!enabled)?'disabled':'')+'>'
+      +   '<span class="subjectdash-tag'+(elective?' elective':'')+'">'+escHtml(tag)+'</span>'
+      +   '<div class="subjectdash-note">'+note+'</div>'
+      + '</div>';
+  }
+  function renderSubjectDashboard(){
+    if(typeof subjectSetupSections!=='function' || typeof currentSubjectSetupSectionKey!=='function') return '';
+    const sections=subjectSetupSections(); if(!sections.length) return '';
+    const key=currentSubjectSetupSectionKey();
+    const stu=(typeof studentForSubjectSetupKey==='function'?studentForSubjectSetupKey(key):null);
+    const cfg=(typeof getSectionSubjectConfig==='function'?getSectionSubjectConfig(stu):{})||{};
+    const grade=(typeof gradeNumberForSubjectStudent==='function'?gradeNumberForSubjectStudent(stu):(stu&&stu.grade?stu.grade:''));
+    const cards=checks.map(function(k){ return subjectCard(stu,cfg,k); }).join('');
+    return ''
+      + '<div class="subjectdash">'
+      +   '<div class="subjectdash-topline"><div class="sub-intro"><div class="sub-icon">▤</div><div><h4>Subjects Select</h4><p>Choose and rename subjects for the selected Grade + Section.</p></div></div><div class="subjectdash-reminder"><div class="i">i</div><div>Selected subjects are used by Grades, SF9 Preview / Print, and Summary Forms.</div></div></div>'
+      +   '<div class="subjectdash-summary">'
+      +     '<div class="subjectdash-card"><div class="subjectdash-select-row"><label>Grade + Section</label><select onchange="window.smartSubjectChangedSection(this.value)">'+sections.map(function(x){ return '<option value="'+valAttr(x.key)+'" '+(x.key===key?'selected':'')+'>'+escHtml(x.label)+'</option>'; }).join('')+'</select></div></div>'
+      +     '<div class="subjectdash-card"><div class="subjectdash-statrow"><div class="icon">✓</div><div><small>Selected Subjects</small><strong>'+selectedCount(cfg)+' / 10</strong><span>subjects selected</span></div></div></div>'
+      +     '<div class="subjectdash-card"><div class="subjectdash-statrow"><div class="icon">▤</div><div><small>Grade Level</small><strong>'+escHtml(String(grade||''))+'</strong><span>subject labels follow this grade</span></div></div></div>'
+      +   '</div>'
+      +   '<div class="subjectdash-grid-card">'
+      +     '<div class="subjectdash-grid-head"><div class="head-icon">▤</div><div><h5>Available Subjects</h5><p>Turn subjects on/off and edit the displayed subject name.</p></div></div>'
+      +     '<div class="subjectdash-grid">'+cards+'</div>'
+      +     '<div class="subjectdash-bottom"><div class="subjectdash-actions"><button class="subjectdash-btn" type="button" onclick="window.smartRestoreGradeSubjects()">↻ Restore Grade Subjects</button><button class="subjectdash-btn" type="button" onclick="window.smartFocusElectiveSetup()">＋ Elective Setup</button></div>'+statusHtml(cfg)+'</div>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  window.smartSubjectChangedSection=function(value){
+    if(typeof subjectSetupChangedSection==='function') subjectSetupChangedSection(value);
+    setTimeout(function(){
+      const stu=currentStu();
+      const cfg=(typeof getSectionSubjectConfig==='function' && stu)?getSectionSubjectConfig(stu):null;
+      if(cfg && !cfg.__smartSubjectAutoInit && typeof applySubjectPreset==='function'){
+        cfg.__smartSubjectAutoInit=true;
+        applySubjectPreset('standard');
+      } else if(typeof window.renderEditor==='function') {
+        window.renderEditor();
+      }
+    },0);
+  };
+  window.smartSubjectCardToggle=function(k,checked){
+    if(typeof setSectionSubjectChoice==='function') setSectionSubjectChoice(k,checked);
+    setTimeout(function(){
+      const card=document.getElementById('subject-card-'+k);
+      if(card) card.classList.toggle('disabled', !checked);
+      const input=card?card.querySelector('input[type=text]'):null;
+      if(input && (k==='elective1'||k==='elective2')) input.disabled=!checked;
+      if(typeof window.renderEditor==='function') window.renderEditor();
+    },0);
+  };
+  window.smartSubjectNameChange=function(k,value){
+    if(k==='elective1' || k==='elective2'){
+      if(typeof setSectionElectiveName==='function') setSectionElectiveName(k,value);
+    } else {
+      if(typeof setSectionSubjectName==='function') setSectionSubjectName(k,value);
+    }
+    setTimeout(function(){ if(typeof window.renderEditor==='function') window.renderEditor(); },0);
+  };
+  window.smartRestoreGradeSubjects=function(){
+    if(typeof applySubjectPreset==='function') applySubjectPreset('standard');
+    setTimeout(function(){ if(typeof window.renderEditor==='function') window.renderEditor(); },0);
+  };
+  window.smartFocusElectiveSetup=function(){
+    ['elective1','elective2'].forEach(function(k){
+      const el=document.getElementById('subject-card-'+k);
+      if(el) el.classList.add('highlight');
+      setTimeout(function(){ if(el) el.classList.remove('highlight'); },1500);
+    });
+    const el=document.getElementById('subject-card-elective1');
+    if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); const inp=el.querySelector('input[type=text]'); if(inp) inp.focus(); }
+  };
+
+  function installSubjectDashboard(){
+    if(typeof window.subjectSetupPanelHtml==='function') window.subjectSetupPanelHtml=renderSubjectDashboard;
+  }
+  function wrapRenderEditor(){
+    const orig=window.renderEditor;
+    if(typeof orig==='function' && !window.__smartSubjectExactWrapped){
+      window.renderEditor=function(){
+        const out=orig.apply(this,arguments);
+        if(typeof EDIT_TAB!=='undefined' && EDIT_TAB==='subjects') installSubjectDashboard();
+        return out;
+      };
+      window.__smartSubjectExactWrapped=true;
+    }
+  }
+  installSubjectDashboard();
+  wrapRenderEditor();
+  document.addEventListener('DOMContentLoaded',function(){ setTimeout(function(){ installSubjectDashboard(); wrapRenderEditor(); },0); });
+})();
+</script>
+
+<style id="studentDataTopStylePatch">
+  /* Student Data only: compact top dashboard matching the requested pastel look. */
+  #editPanel .studentdash{gap:14px!important}
+  #editPanel .studentdash-topline{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;padding:0 2px!important}
+  #editPanel .studentdash-topline .sd-intro{display:flex!important;align-items:center!important;gap:12px!important}
+  #editPanel .studentdash-topline .sd-icon{width:46px!important;height:46px!important;border-radius:50%!important;background:#f4ddff!important;color:#6b3bb0!important;font-size:20px!important;box-shadow:none!important}
+  #editPanel .studentdash-topline h4{font-size:20px!important;line-height:1.1!important;margin:0 0 3px!important;color:#17191d!important}
+  #editPanel .studentdash-topline p{font-size:11.5px!important;line-height:1.4!important;margin:0!important;color:#77717a!important}
+  #editPanel .studentdash-reminder{min-width:330px!important;max-width:430px!important;border:1px solid #f2c9d9!important;background:#fff7fa!important;border-radius:14px!important;padding:12px 14px!important;display:flex!important;gap:10px!important;align-items:flex-start!important;font-size:10.5px!important;line-height:1.45!important;color:#655963!important}
+  #editPanel .studentdash-reminder .i{width:32px!important;height:32px!important;border-radius:50%!important;background:#ffd3e4!important;color:#e94282!important;font-size:17px!important;display:grid!important;place-items:center!important;flex:0 0 auto!important}
+
+  #editPanel .studentdash-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+  #editPanel .studentdash-stat{min-height:76px!important;padding:12px 14px!important;border-radius:15px!important;border:1px solid #eadde3!important;display:grid!important;grid-template-columns:38px 1fr!important;gap:10px!important;align-items:center!important;box-shadow:none!important}
+  #editPanel .studentdash-stat:nth-child(1){background:#fff8fb!important}
+  #editPanel .studentdash-stat:nth-child(2){background:#f7fff9!important}
+  #editPanel .studentdash-stat:nth-child(3){background:#fffaf5!important}
+  #editPanel .studentdash-stat:nth-child(4){background:#fbfaff!important}
+  #editPanel .studentdash-stat-icon{width:36px!important;height:36px!important;border-radius:50%!important;font-size:16px!important}
+  #editPanel .studentdash-stat:nth-child(1) .studentdash-stat-icon{background:#fff0f6!important;color:#7a45b8!important}
+  #editPanel .studentdash-stat:nth-child(2) .studentdash-stat-icon{background:#effbf2!important;color:#111!important}
+  #editPanel .studentdash-stat:nth-child(3) .studentdash-stat-icon{background:#fff3e8!important;color:#111!important}
+  #editPanel .studentdash-stat:nth-child(4) .studentdash-stat-icon{background:#f3f1ff!important;color:#111!important}
+  #editPanel .studentdash-stat small{font-size:8.6px!important;letter-spacing:.55px!important;font-weight:900!important;color:#666170!important;margin-bottom:2px!important}
+  #editPanel .studentdash-stat strong{font-size:22px!important;line-height:1!important;color:#17191d!important}
+  #editPanel .studentdash-stat span{font-size:8.8px!important;color:#837780!important;margin-top:3px!important}
+
+  #editPanel .studentdash-filters{display:grid!important;grid-template-columns:minmax(260px,1fr) 150px 150px 150px auto!important;gap:10px!important;align-items:center!important}
+  #editPanel .studentdash-filters input,
+  #editPanel .studentdash-filters select{min-height:42px!important;border-radius:11px!important;border:1px solid #e7dbe0!important;background:#fff!important;padding:10px 12px!important;font-size:10.8px!important}
+  #editPanel .studentdash-filters .studentdash-add{min-height:42px!important;border-radius:12px!important;padding:0 16px!important;background:#ef4b8b!important;color:#fff!important;font-size:12px!important;font-weight:900!important}
+
+  /* Keep Status visible and readable. */
+  #editPanel .studentdash-status-chip{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;border-radius:999px!important;padding:6px 9px!important;font-size:9.5px!important;font-weight:800!important;white-space:nowrap!important}
+  #editPanel .studentdash-status-chip.complete{background:#eaf8ef!important;color:#168043!important}
+  #editPanel .studentdash-status-chip.review{background:#fff4e7!important;color:#a86a00!important}
+
+  @media(max-width:1150px){
+    #editPanel .studentdash-topline{flex-direction:column!important;align-items:stretch!important}
+    #editPanel .studentdash-reminder{min-width:0!important;max-width:none!important;width:100%!important;box-sizing:border-box!important}
+    #editPanel .studentdash-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  }
+</style>
+
+<style id="importedDataNavRecoveryStyle">
+  #sideEditSubjects,#sideEditAttendance,#sideEditLearners{pointer-events:auto!important;cursor:pointer!important;position:relative;z-index:2}
+</style>
+<script id="importedDataNavRecoveryScript">
+(function(){
+  'use strict';
+  function bind(id,tab){
+    const el=document.getElementById(id);
+    if(!el || el.dataset.navRepairBound==='1')return;
+    el.dataset.navRepairBound='1';
+    el.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(typeof window.openImportedDataTab==='function')window.openImportedDataTab(tab);
+    },true);
+  }
+  function bindAll(){
+    bind('sideEditLearners','learners');
+    bind('sideEditSubjects','subjects');
+    bind('sideEditAttendance','attendance');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindAll);
+  else bindAll();
+})();
+</script>
+
+
+<!-- =========================================================
+     SCHOOL SF9 OUTER BORDER OPTION
+     Adds only an ON/OFF control for the existing outer SF9 frame.
+     Inner tables/lines are intentionally untouched.
+     ========================================================= -->
+<style id="sf9OuterBorderOptionStyles">
+  /* Base OFF state for screen preview. Runtime print-safe rules are injected later. */
+  body.sf9-outer-border-off .panel,
+  body.sf9-outer-border-off .left,
+  body.sf9-outer-border-off .right{
+    border:0!important;
+  }
+</style>
+<script id="sf9OuterBorderOptionPatch">
+(function(){
+  'use strict';
+  const STORAGE_KEY='smart_sf9_outer_border_v1';
+
+  function applyOuterBorder(value){
+    const enabled=String(value||'on').toLowerCase()!=='off';
+    document.body.classList.toggle('sf9-outer-border-off',!enabled);
+    ensureOuterBorderRuntimeStyle(enabled);
+    const sel=document.getElementById('sf9OuterBorderSelect');
+    if(sel)sel.value=enabled?'on':'off';
+    try{localStorage.setItem(STORAGE_KEY,enabled?'on':'off');}catch(e){}
+  }
+
+
+  function ensureOuterBorderRuntimeStyle(enabled){
+    let style=document.getElementById('sf9OuterBorderRuntimeStyles');
+    if(!style){
+      style=document.createElement('style');
+      style.id='sf9OuterBorderRuntimeStyles';
+      document.head.appendChild(style);
+    }
+    if(enabled){
+      style.textContent='';
+      return;
+    }
+    style.textContent=`
+      body.sf9-outer-border-off .panel,
+      body.sf9-outer-border-off .left,
+      body.sf9-outer-border-off .right{
+        border:0!important;
+      }
+      @media print{
+        body.sf9-outer-border-off .panel,
+        body.sf9-outer-border-off .left,
+        body.sf9-outer-border-off .right{
+          border:0!important;
+        }
+      }
+    `;
+  }
+
+  function initOuterBorderControl(){
+    const appearance=document.getElementById('sf9SettingsAppearance');
+    if(!appearance || document.getElementById('sf9OuterBorderSelect'))return;
+
+    const label=document.createElement('label');
+    label.className='control-label';
+    label.id='sf9OuterBorderControlLabel';
+    label.setAttribute('for','sf9OuterBorderSelect');
+    label.textContent='SF9 Outer Border';
+
+    const select=document.createElement('select');
+    select.id='sf9OuterBorderSelect';
+    select.title='Show or hide the outer rectangular border of the SF9 pages';
+    select.innerHTML='<option value="on">ON — Show outer border</option><option value="off">OFF — No outer border</option>';
+
+    const note=document.createElement('div');
+    note.className='sf9-settings-section-note';
+    note.id='sf9OuterBorderNote';
+    note.textContent='Controls only the outer SF9 frame across all paper sizes and layouts. For A5 / Back-to-Back, both SF9 pages change together; inner table borders stay unchanged.';
+
+    appearance.appendChild(label);
+    appearance.appendChild(select);
+    appearance.appendChild(note);
+
+    let saved='on';
+    try{saved=localStorage.getItem(STORAGE_KEY)||'on';}catch(e){}
+    applyOuterBorder(saved);
+
+    select.addEventListener('change',function(){
+      applyOuterBorder(this.value);
+      if(typeof window.showToast==='function'){
+        window.showToast(this.value==='off'?'SF9 outer border hidden.':'SF9 outer border shown.');
+      }
+    });
+
+    /* Keep the existing explicit Save button snapshot complete without replacing its handler. */
+    const saveBtn=document.getElementById('sf9SettingsSaveButton');
+    if(saveBtn){
+      saveBtn.addEventListener('click',function(){
+        try{
+          const raw=localStorage.getItem('smart_sf9_settings_saved_snapshot_v1');
+          const snap=raw?JSON.parse(raw):{};
+          snap.outerBorder=select.value;
+          localStorage.setItem('smart_sf9_settings_saved_snapshot_v1',JSON.stringify(snap));
+        }catch(e){}
+      });
+    }
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOuterBorderControl);
+  else initOuterBorderControl();
+
+  window.setSF9OuterBorder=applyOuterBorder;
+})();
+</script>
+
+
+
+
+<!-- ===== SMART SF9 v32 — Subject-row Grade Position + Additive Auto Comments ===== -->
+<style id="sf9V32SubjectRowGradePositionStyles">
+  #sf9SubjectGradeAlignmentBlock{width:100%;display:flex;flex-direction:column;gap:5px;margin-top:8px;padding-top:8px;border-top:1px dashed #ead0db}
+  #sf9SubjectGradeAlignmentBlock .sf9-row-grade-label{font:900 10px Arial,sans-serif;color:#4d3f45}
+  #sf9SubjectGradeAlignmentSelect{width:100%;min-height:34px;border:1px solid #dfc2cf;border-radius:8px;background:#fff;padding:6px 8px;font:800 10px Arial,sans-serif;color:#222}
+  #sf9SubjectGradeAlignmentHint{font:700 9px/1.35 Arial,sans-serif;color:#7f6a73}
+</style>
+<script id="sf9V32SubjectRowGradePositionPatch">
+(function(){
+  'use strict';
+  const ROW_ALIGN_KEY='smart_sf9_grade_row_alignment_v1';
+  const OLD_CELL_ALIGN_KEY='smart_sf9_grade_alignment_individual_v1';
+  let rowMap={};
+  try{const x=JSON.parse(localStorage.getItem(ROW_ALIGN_KEY)||'{}');if(x&&typeof x==='object')rowMap=x;}catch(e){}
+
+  function save(){try{localStorage.setItem(ROW_ALIGN_KEY,JSON.stringify(rowMap));}catch(e){}}
+  function clean(v){return String(v==null?'':v).replace(/\s+/g,' ').trim();}
+  function selectedArea(){return document.querySelector('.grade td.area.sf9-subject-indent-selected');}
+  function selectedKey(){const a=selectedArea();return a?(a.dataset.sf9SubjectIndentKey||''):'';}
+  function selectedLabel(){const a=selectedArea();return a?(a.dataset.sf9SubjectIndentLabel||clean(a.innerText||a.textContent)||'Subject'):'';}
+  function gradeCellsForArea(area){
+    if(!area)return[];
+    const row=area.closest('tr');if(!row)return[];
+    let cells=Array.from(row.querySelectorAll('.sf9-grade-number'));
+    if(!cells.length){
+      const all=Array.from(row.children||[]);
+      const areaIdx=all.indexOf(area);
+      cells=all.slice(areaIdx+1).filter(function(td){
+        const t=clean(td.innerText||td.textContent);
+        return td.tagName==='TD' && (/^-?\d+(?:\.\d+)?$/.test(t)||t===''||t==='—'||t==='-');
+      }).slice(0,4);
+    }
+    return cells;
+  }
+  function applyRow(area){
+    if(!area)return;
+    const key=area.dataset.sf9SubjectIndentKey||'';if(!key)return;
+    const v=rowMap[key];
+    if(!['left','right'].includes(v))return;
+    gradeCellsForArea(area).forEach(function(td){
+      td.style.setProperty('text-align',v,'important');
+      td.style.setProperty('text-align-last',v,'important');
+    });
+  }
+  function clearRow(area){
+    gradeCellsForArea(area).forEach(function(td){
+      td.style.removeProperty('text-align');
+      td.style.removeProperty('text-align-last');
+    });
+  }
+  function applyAll(){
+    if(!Object.keys(rowMap).length)return;
+    document.querySelectorAll('.grade td.area').forEach(function(area){
+      const key=area.dataset.sf9SubjectIndentKey||'';
+      if(key&&Object.prototype.hasOwnProperty.call(rowMap,key))applyRow(area);
+    });
+  }
+  function updateUI(){
+    const sel=document.getElementById('sf9SubjectGradeAlignmentSelect');
+    const hint=document.getElementById('sf9SubjectGradeAlignmentHint');
+    if(!sel)return;
+    const key=selectedKey(),label=selectedLabel();
+    sel.disabled=!key;
+    sel.value=key&&Object.prototype.hasOwnProperty.call(rowMap,key)?rowMap[key]:'center';
+    if(hint)hint.textContent=key?('Grades for '+label+' — this changes the grade numbers in this subject row only.'):'Select a subject row first using Adjust Subject / Grade Position.';
+  }
+  function setSelected(v){
+    const area=selectedArea(),key=selectedKey();if(!area||!key)return;
+    v=String(v||'center').toLowerCase();
+    if(!['left','center','right'].includes(v))v='center';
+    if(v==='center'){delete rowMap[key];clearRow(area);}else{rowMap[key]=v;applyRow(area);}
+    save();updateUI();
+    if(typeof window.showToast==='function')window.showToast('✅ '+selectedLabel()+' grades set to '+v.charAt(0).toUpperCase()+v.slice(1)+'.');
+  }
+  function removeOldGradePicker(){
+    const oldBtn=document.getElementById('sf9GradePositionToolButton');
+    if(oldBtn&&oldBtn.classList.contains('sf9-grade-position-active')){try{oldBtn.click();}catch(e){}}
+    ['sf9GradePositionControlLabel','sf9GradePositionToolButton','sf9GradePositionWrap'].forEach(function(id){const el=document.getElementById(id);if(el)el.remove();});
+    document.querySelectorAll('#sf9SettingsSubjects .sf9-grade-position-divider').forEach(function(el){el.remove();});
+    document.body.classList.remove('sf9-grade-position-mode');
+  }
+  function install(){
+    removeOldGradePicker();
+    /* Neutralize the superseded all-grades alignment control. The current setting is per selected subject row. */
+    try{localStorage.setItem('smart_sf9_grade_number_alignment_v1','center');}catch(e){}
+    try{if(typeof window.setGradeNumberAlignment==='function'&&window.__sf9GlobalGradeAlignNeutralized!==true){window.__sf9GlobalGradeAlignNeutralized=true;window.setGradeNumberAlignment('center');}}catch(e){}
+    const oldGlobal=document.getElementById('gradeNumberAlignmentSelect');
+    if(oldGlobal){const oldLabel=oldGlobal.previousElementSibling;if(oldLabel&&oldLabel.classList&&oldLabel.classList.contains('control-label'))oldLabel.remove();oldGlobal.remove();}
+    const label=document.getElementById('sf9SubjectIndentControlLabel');
+    if(label)label.textContent='Individual Subject & Grade Position';
+    const btn=document.getElementById('sf9SubjectIndentToolButton');
+    if(btn){btn.textContent=btn.textContent.indexOf('ON')>=0?'✓ Subject / Grade Position ON':'↔ Adjust Subject / Grade Position';btn.title='Select one subject row in the SF9 preview, then adjust the subject indent and the grades in that row.';}
+    const wrap=document.getElementById('sf9SubjectIndentWrap');
+    if(!wrap)return;
+    const stat=document.getElementById('sf9SubjectIndentStatus');
+    if(stat&&!selectedKey())stat.textContent='Click one SUBJECT NAME in the SF9 preview. Then adjust its subject indent and grade position here.';
+    if(!document.getElementById('sf9SubjectGradeAlignmentBlock')){
+      const block=document.createElement('div');block.id='sf9SubjectGradeAlignmentBlock';
+      block.innerHTML='<div class="sf9-row-grade-label">Grades in Selected Subject</div>'+
+        '<select id="sf9SubjectGradeAlignmentSelect" disabled><option value="left">← Left</option><option value="center">Center</option><option value="right">Right →</option></select>'+
+        '<div id="sf9SubjectGradeAlignmentHint">Select a subject row first.</div>';
+      wrap.appendChild(block);
+      document.getElementById('sf9SubjectGradeAlignmentSelect').addEventListener('change',function(){setSelected(this.value);});
+    }
+    const section=document.getElementById('sf9SettingsSubjects');
+    if(section){
+      const title=section.querySelector('.sf9-settings-section-title');if(title)title.textContent='Subjects, Grades & Headers';
+      const note=section.querySelector('.sf9-settings-section-note');if(note)note.textContent='Select a subject name in the SF9 preview. You can adjust that subject label and all grade numbers in the same row without selecting individual grade boxes.';
+    }
+    updateUI();applyAll();
+  }
+
+  /* The added Tagalog comments remain additions: include the old built-in auto suggestion too. */
+  if(typeof mrAutoFromBanks==='function' && typeof MR_CUSTOM_AUTO_PREVIOUS==='function'){
+    const previousBankResolver=mrAutoFromBanks;
+    mrAutoFromBanks=function(stu,term,lang,banks){
+      const avg=typeof termAverageLocal==='function'?termAverageLocal(stu,term):'';
+      if(avg==='')return'';
+      lang=(lang==='tl'?'tl':'en');
+      let custom='';
+      try{custom=String(previousBankResolver(stu,term,lang,banks)||'').trim();}catch(e){}
+      let builtin='';
+      try{builtin=String(MR_CUSTOM_AUTO_PREVIOUS(stu,term,lang)||'').trim();}catch(e){}
+      if(!custom)return builtin;
+      if(!builtin||builtin===custom)return custom;
+      const seed=[stu&&stu.id||'',stu&&stu.name||'',stu&&stu.grade||'',term,avg,lang,'combined-auto'].join('|');
+      let idx=0;
+      if(typeof stableIndexLocal==='function')idx=stableIndexLocal(seed,2);else idx=Math.abs(seed.split('').reduce(function(a,c){return((a<<5)-a)+c.charCodeAt(0)|0;},0))%2;
+      return idx===0?custom:builtin;
+    };
+    if(typeof automaticCommentLocal==='function'){
+      automaticCommentLocal=function(stu,term,lang){return mrAutoFromBanks(stu,term,lang,typeof mrReadStoredCommentBanks==='function'?mrReadStoredCommentBanks():undefined);};
+    }
+  }
+
+  /* Existing per-cell alignment from the previous build is no longer the active control. */
+  try{localStorage.removeItem(OLD_CELL_ALIGN_KEY);}catch(e){}
+
+  install();
+  document.addEventListener('click',function(e){
+    if(e.target&&e.target.closest&&e.target.closest('.grade td.area'))setTimeout(function(){updateUI();applyAll();},0);
+    if(e.target&&e.target.closest&&e.target.closest('#sf9SubjectIndentToolButton'))setTimeout(updateUI,0);
+  },true);
+
+  /* Performance: the settings controls are static. Do not reinstall them or scan the whole
+     preview through a MutationObserver on every DOM change. Re-apply row alignment only
+     after the preview itself has finished rendering or the paper size changes. */
+  if(typeof window.render==='function'){
+    const prev=window.render;
+    window.render=function(){
+      const r=prev.apply(this,arguments);
+      requestAnimationFrame(function(){applyAll();updateUI();});
+      return r;
+    };
+  }
+  if(typeof window.changePaperSize==='function'){
+    const prev=window.changePaperSize;
+    window.changePaperSize=function(){
+      const r=prev.apply(this,arguments);
+      requestAnimationFrame(function(){applyAll();updateUI();});
+      return r;
+    };
+  }
+})();
+</script>
+
+
+<!-- ===== SMART SF9 v36 — Smooth No-Duplicate Auto Comments ===== -->
+<style id="sf9V36SmoothNoDupStyles">
+  #sf9SettingsCommentsSmooth .sf9-nodup-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+  #sf9SettingsCommentsSmooth #sf9NoDuplicateAutoCommentsSmooth{min-height:34px;min-width:220px;border:1px solid #dfc2cf;border-radius:8px;background:#fff;padding:6px 8px;font:800 10px Arial,sans-serif;color:#222}
+  #sf9SettingsCommentsSmooth .sf9-nodup-rebuild{min-height:34px;border:1px solid #efb4cc;border-radius:8px;background:#fff7fa;padding:6px 10px;font:900 9.5px Arial,sans-serif;color:#b4235a;cursor:pointer}
+  #sf9NoDuplicateCommentStatusSmooth{margin-top:7px;padding:8px 9px;border-radius:8px;background:#f4fbf6;border:1px solid #cce8d3;font:700 9.5px/1.4 Arial,sans-serif;color:#366646}
+  #sf9NoDuplicateCommentStatusSmooth.warn{background:#fff8e8;border-color:#eed49b;color:#815d16}
+</style>
+<script id="sf9V36SmoothNoDupPatch">
+(function(){
+  'use strict';
+  const SETTING_KEY='smart_sf9_no_duplicate_auto_comments_v2';
+  const BASE_AUTO=(typeof automaticCommentLocal==='function')?automaticCommentLocal:null;
+  const BASE_AUTOFILL=(typeof autoFillMissingComments==='function')?autoFillMissingComments:null;
+  const BASE_FILL_MISSING=(typeof fillMissingAutoComments==='function')?fillMissingAutoComments:null;
+  const BASE_SYNC_ALL=(typeof mrSyncAllAutoComments==='function')?mrSyncAllAutoComments:null;
+  const BASE_SYNC_ONE=(typeof mrSyncAutoCommentForStudent==='function')?mrSyncAutoCommentForStudent:null;
+  const BASE_SAVE_BANK=(typeof saveCustomCommentBank==='function')?saveCustomCommentBank:null;
+  const BASE_APPLY_PACK=(typeof mrApplyUserCommentPack==='function')?mrApplyUserCommentPack:null;
+
+  let poolCache=new Map(),bankVersion=0,lastWarning='',normalizeTimer=0,normalizing=false;
+  let lastStudentsRef=null,lastStudentsLength=-1;
+
+  function clean(v){return String(v==null?'':v).replace(/\s+/g,' ').trim();}
+  function unique(arr){const out=[],seen=new Set();(arr||[]).forEach(function(v){const s=clean(v),k=s.toLowerCase();if(!s||seen.has(k))return;seen.add(k);out.push(s);});return out;}
+  function stable(text,len){if(!len)return 0;if(typeof stableIndexLocal==='function')return stableIndexLocal(text,len);let h=0,s=String(text||'');for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return Math.abs(h)%len;}
+  function avgOf(stu,term){try{return typeof termAverageLocal==='function'?termAverageLocal(stu,term):'';}catch(e){return'';}}
+  function rangeKey(avg){if(typeof mrCommentRangeKey==='function')return mrCommentRangeKey(avg);const n=Number(avg);return n>=90?'g90':n>=85?'g85':n>=80?'g80':n>=75?'g75':'below75';}
+  function rangeLabel(k){if(typeof mrRangeLabel==='function')return mrRangeLabel(k);return k==='g90'?'90–100':k==='g85'?'85–89':k==='g80'?'80–84':k==='g75'?'75–79':'Below 75';}
+  function langField(term,lang){if(typeof mrLanguageField==='function')return mrLanguageField(term,lang);return String(term)+'Comment'+(lang==='tl'?'Tl':'En');}
+  function sourceField(term,lang){if(typeof mrSourceField==='function')return mrSourceField(term,lang);return langField(term,lang)+'Source';}
+  function sectionKey(stu){if(typeof sectionKeyForStudent==='function')return sectionKeyForStudent(stu);return stu?String(stu.grade||'')+'|||'+String(stu.section||''):'';}
+  function activeLang(){try{return typeof mrCommentLanguage==='function'?mrCommentLanguage():((typeof COMMENT_LANGUAGE!=='undefined'&&COMMENT_LANGUAGE==='tl')?'tl':'en');}catch(e){return'en';}}
+  function enabled(){try{if(typeof DATA!=='undefined'&&DATA&&typeof DATA.noDuplicateAutoComments==='boolean')return DATA.noDuplicateAutoComments;const v=localStorage.getItem(SETTING_KEY);if(v==='off')return false;if(v==='on')return true;}catch(e){}return true;}
+  function persist(on){on=!!on;try{localStorage.setItem(SETTING_KEY,on?'on':'off');}catch(e){}try{if(typeof DATA!=='undefined'&&DATA)DATA.noDuplicateAutoComments=on;}catch(e){}updateStatus();}
+  function invalidatePools(){bankVersion++;poolCache.clear();lastStudentsRef=null;lastStudentsLength=-1;}
+
+  function customEntries(stu,term,lang){
+    const avg=avgOf(stu,term);if(avg==='')return[];
+    try{const banks=(typeof mrReadStoredCommentBanks==='function')?mrReadStoredCommentBanks():null;const k=rangeKey(avg);return unique(banks&&banks[lang]&&banks[lang][k]||[]);}catch(e){return[];}
+  }
+  function candidatePool(stu,term,lang){
+    lang=lang==='tl'?'tl':'en';const avg=avgOf(stu,term);if(avg==='')return[];const rk=rangeKey(avg);
+    const key=[bankVersion,String(stu&&stu.grade||''),term,lang,rk].join('|');
+    if(poolCache.has(key))return poolCache.get(key);
+    const list=customEntries(stu,term,lang);
+    /* Built-in variety is sampled only while rebuilding the bank cache, never during preview navigation. */
+    if(typeof BASE_AUTO==='function'){
+      for(let i=0;i<12;i++){
+        try{const c=Object.assign({},stu||{});c.id='__unique_pool_'+rk+'_'+i;c.name='Learner '+(i+1);const txt=clean(BASE_AUTO(c,term,lang));if(txt)list.push(txt);}catch(e){}
+      }
+      try{const txt=clean(BASE_AUTO(stu,term,lang));if(txt)list.push(txt);}catch(e){}
+    }
+    const pool=unique(list);poolCache.set(key,pool);return pool;
+  }
+  function isManual(stu,term,lang){
+    const sf=sourceField(term,lang),src=String(stu&&stu[sf]||'').toLowerCase();
+    return src==='manual';
+  }
+  function warningFor(stu,term,lang,rk){return '⚠️ Not enough unique '+(lang==='tl'?'Tagalog':'English')+' comments in '+rangeLabel(rk)+' for '+String(stu&&stu.grade||'')+' - '+String(stu&&stu.section||'')+'. A comment was reused only because the available bank was exhausted.';}
+  function setStatus(msg,warn){lastWarning=msg||'';const el=document.getElementById('sf9NoDuplicateCommentStatusSmooth');if(el){el.textContent=lastWarning||'No duplicate auto comments is ON.';el.classList.toggle('warn',!!warn);}}
+
+  function normalize(students,langs){
+    if(!enabled()||normalizing)return{changed:false,shortages:0};
+    normalizing=true;
+    try{
+      students=Array.isArray(students)?students:((typeof DATA!=='undefined'&&DATA&&Array.isArray(DATA.students))?DATA.students:[]);
+      langs=langs&&langs.length?langs:['en','tl'];
+      const groups={};students.forEach(function(s){const k=sectionKey(s);(groups[k]||(groups[k]=[])).push(s);});
+      let changed=false,shortages=0;
+      Object.keys(groups).forEach(function(gk){
+        const group=groups[gk];
+        ['term1','term2','term3'].forEach(function(term){
+          langs.forEach(function(lang){
+            const used=new Set();
+            group.forEach(function(s){
+              if(!isManual(s,term,lang))return;
+              const t=clean(s&&s[langField(term,lang)]);if(t)used.add(t.toLowerCase());
+            });
+            group.forEach(function(s){
+              const avg=avgOf(s,term);if(avg==='')return;
+              if(isManual(s,term,lang))return;
+              const rk=rangeKey(avg),pool=candidatePool(s,term,lang);if(!pool.length)return;
+              let available=pool.filter(function(x){return!used.has(x.toLowerCase());});
+              let pick='',short=false;
+              const seed=[s&&s.id||'',s&&s.name||'',s&&s.grade||'',s&&s.section||'',term,avg,lang,rk].join('|');
+              if(available.length)pick=available[stable(seed,available.length)]||available[0];
+              else{pick=pool[stable(seed+'|reuse',pool.length)]||pool[0];short=true;}
+              if(!pick)return;
+              const f=langField(term,lang),sf=sourceField(term,lang);
+              if(clean(s[f])!==pick||String(s[sf]||'').toLowerCase()!=='auto')changed=true;
+              s[f]=pick;s[sf]='auto';used.add(pick.toLowerCase());
+              if(short){shortages++;lastWarning=warningFor(s,term,lang,rk);}
+            });
+          });
+        });
+      });
+      const al=activeLang();students.forEach(function(s){['term1','term2','term3'].forEach(function(term){const f=langField(term,al);if(clean(s[f]))s[term+'Comment']=s[f];});});
+      if(shortages)setStatus(lastWarning,true);else setStatus('✅ Unique auto comments prepared. Preview navigation stays fast because duplicate checking is not repeated on every click.',false);
+      return{changed:changed,shortages:shortages};
+    }finally{normalizing=false;}
+  }
+
+  function scheduleNormalize(students,langs,force){
+    if(!enabled())return;
+    const arr=Array.isArray(students)?students:((typeof DATA!=='undefined'&&DATA&&Array.isArray(DATA.students))?DATA.students:[]);
+    if(!force && arr===lastStudentsRef && arr.length===lastStudentsLength)return;
+    lastStudentsRef=arr;lastStudentsLength=arr.length;
+    if(normalizeTimer)return;
+    const run=function(){normalizeTimer=0;const r=normalize(arr,langs||['en','tl']);if(r.changed){try{if(typeof saveLocalData==='function')saveLocalData();}catch(e){}}};
+    if(typeof requestIdleCallback==='function')normalizeTimer=requestIdleCallback(run,{timeout:500});
+    else normalizeTimer=setTimeout(run,30);
+  }
+
+  /* IMPORTANT: automaticCommentLocal remains the normal fast resolver. We do NOT scan the section here. */
+  if(typeof BASE_AUTOFILL==='function')window.autoFillMissingComments=function(students){const r=BASE_AUTOFILL.apply(this,arguments);scheduleNormalize(students,['en','tl'],false);return r;};
+  if(typeof BASE_FILL_MISSING==='function')window.fillMissingAutoComments=function(students){const r=BASE_FILL_MISSING.apply(this,arguments);scheduleNormalize(students,['en'],false);return r;};
+  if(typeof BASE_SYNC_ALL==='function')window.mrSyncAllAutoComments=function(){const r=BASE_SYNC_ALL.apply(this,arguments);scheduleNormalize(null,['en','tl'],false);return r;};
+  if(typeof BASE_SYNC_ONE==='function')window.mrSyncAutoCommentForStudent=function(){return BASE_SYNC_ONE.apply(this,arguments);};
+  if(typeof BASE_SAVE_BANK==='function')window.saveCustomCommentBank=function(){const r=BASE_SAVE_BANK.apply(this,arguments);invalidatePools();scheduleNormalize(null,['en','tl'],true);return r;};
+  if(typeof BASE_APPLY_PACK==='function')window.mrApplyUserCommentPack=function(){const r=BASE_APPLY_PACK.apply(this,arguments);invalidatePools();scheduleNormalize(null,['en','tl'],true);return r;};
+
+  function updateStatus(){const sel=document.getElementById('sf9NoDuplicateAutoCommentsSmooth');if(sel)sel.value=enabled()?'on':'off';if(!lastWarning)setStatus(enabled()?'✅ No duplicate auto comments is ON. Duplicate checking runs only when comments/data need rebuilding, not on every preview click.':'Duplicate prevention is OFF. Repeated auto comments are allowed.',false);}
+  function rebuildNow(){invalidatePools();const r=normalize(null,['en','tl']);try{if(typeof saveLocalData==='function')saveLocalData();}catch(e){}if(typeof window.showToast==='function')window.showToast(r.shortages?lastWarning:'✅ Unique comments rebuilt.');return r;}
+  function installSettings(){
+    const pane=document.getElementById('sf9SettingsPane');if(!pane||document.getElementById('sf9SettingsCommentsSmooth'))return;
+    const old=document.getElementById('sf9SettingsCommentsFast');if(old)old.remove();
+    const sec=document.createElement('div');sec.className='sf9-settings-section';sec.id='sf9SettingsCommentsSmooth';
+    sec.innerHTML='<div class="sf9-settings-section-title">Auto Comments</div><div class="sf9-settings-section-note">Keep auto comments different within the same section without slowing the SF9 Preview. Duplicate checking happens only when comments/data are rebuilt.</div><div class="sf9-nodup-row"><label class="control-label" for="sf9NoDuplicateAutoCommentsSmooth" style="margin:0">No Duplicate Auto Comments</label><select id="sf9NoDuplicateAutoCommentsSmooth"><option value="on">ON — Keep comments unique per section</option><option value="off">OFF — Allow repeated comments</option></select><button type="button" class="sf9-nodup-rebuild" id="sf9RebuildUniqueComments">↻ Rebuild Unique Comments</button></div><div id="sf9NoDuplicateCommentStatusSmooth"></div>';
+    const footer=document.getElementById('sf9SettingsFooter');if(footer&&footer.parentNode===pane)pane.insertBefore(sec,footer);else pane.appendChild(sec);
+    const sel=document.getElementById('sf9NoDuplicateAutoCommentsSmooth');sel.value=enabled()?'on':'off';
+    sel.addEventListener('change',function(){const on=this.value==='on';persist(on);if(on){rebuildNow();}else if(typeof window.showToast==='function')window.showToast('Duplicate auto comments are allowed.');});
+    const btn=document.getElementById('sf9RebuildUniqueComments');if(btn)btn.addEventListener('click',rebuildNow);
+    updateStatus();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){installSettings();setTimeout(function(){scheduleNormalize(null,['en','tl'],false);},250);},{once:true});
+  else{installSettings();setTimeout(function(){scheduleNormalize(null,['en','tl'],false);},250);}
+  document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('#sf9SettingsButton'))setTimeout(installSettings,0);},true);
+  window.mrRebuildUniqueAutoCommentsFast=rebuildNow;
+})();
+</script>
+<!-- SMART SF9 PERFORMANCE PATCH: preview-fast-v1 (obsolete per-cell grade picker removed; row alignment event-driven) -->
+
+<!-- SMART SF9 SPLIT COMMENT EDITOR V1 -->
+<style id="sf9SplitCommentEditorStyles">
+/* SMART SF9 — Lightweight split-screen Comment Editor */
+#commentOverlay .modal.sf9-comment-split-modal{width:min(1180px,97vw);height:min(760px,92vh);max-height:92vh}
+#commentOverlay .sf9-comment-split-modal .modal-head{flex:0 0 auto}
+#commentOverlay .sf9-split-lang-badge{margin-left:auto;margin-right:4px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:5px 9px;font:800 9px Arial,sans-serif;white-space:nowrap}
+#commentOverlay .sf9-split-comment-body{display:grid;grid-template-columns:minmax(390px,.93fr) minmax(440px,1.07fr);gap:0;min-height:0;flex:1;overflow:hidden;background:#f7f2f5}
+#commentOverlay .sf9-split-grade-panel{min-width:0;min-height:0;padding:14px;background:#f8f3f5;border-right:1px solid #eadce2;overflow:hidden;display:flex;flex-direction:column}
+#commentOverlay #sf9CommentGradeSnapshot{min-height:0;display:flex;flex-direction:column;height:100%}
+#commentOverlay .sf9-snap-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;background:#fff;border:1px solid #ead8df;border-radius:13px;padding:12px 13px;box-shadow:0 4px 14px rgba(76,42,57,.05)}
+#commentOverlay .sf9-snap-kicker{font:900 8.5px Arial,sans-serif;letter-spacing:.12em;color:#c43671;margin-bottom:4px}
+#commentOverlay .sf9-snap-name{font:900 15px/1.2 Arial,sans-serif;color:#202124}
+#commentOverlay .sf9-snap-meta{font:700 9.5px Arial,sans-serif;color:#796971;margin-top:4px}
+#commentOverlay .sf9-snap-average{min-width:92px;text-align:center;background:#17191d;color:#fff;border-radius:11px;padding:9px 10px}
+#commentOverlay .sf9-snap-average small{display:block;font:800 8px/1.2 Arial,sans-serif;opacity:.78}
+#commentOverlay .sf9-snap-average strong{display:block;font:900 25px/1 Arial,sans-serif;margin-top:5px;color:#ff9bc0}
+#commentOverlay .sf9-snap-term-note{font:700 9.5px Arial,sans-serif;color:#6e5a63;padding:9px 2px 7px}
+#commentOverlay .sf9-snap-table-wrap{min-height:0;flex:1;overflow:auto;border:1px solid #ead8df;border-radius:12px;background:#fff}
+#commentOverlay .sf9-snap-table{width:100%;border-collapse:collapse;font:800 9px/1.2 Arial,sans-serif;color:#333}
+#commentOverlay .sf9-snap-table th{position:sticky;top:0;z-index:1;background:#fff0f6;color:#7b3151;padding:8px 6px;border-bottom:1px solid #e9ccd8;text-align:center}
+#commentOverlay .sf9-snap-table th:first-child{text-align:left}
+#commentOverlay .sf9-snap-table td{padding:7px 6px;border-bottom:1px solid #f1e7eb;text-align:center;background:#fff}
+#commentOverlay .sf9-snap-table td.subj{text-align:left;font-weight:800;max-width:210px}
+#commentOverlay .sf9-snap-table tr.is-sub td.subj{padding-left:16px;font-weight:700;color:#6b5a62}
+#commentOverlay .sf9-snap-table .sub-arrow{color:#d75286;margin-right:4px}
+#commentOverlay .sf9-snap-table .is-current{background:#fff0f6!important;color:#b82d66;font-weight:900}
+#commentOverlay .sf9-snap-table tr.is-elective td.subj,#commentOverlay .sf9-snap-table tr.is-special td.subj{font-style:italic}
+#commentOverlay .sf9-snap-foot{display:flex;justify-content:space-between;gap:10px;padding:9px 2px 0;font:700 9px Arial,sans-serif;color:#786971}
+#commentOverlay .sf9-snap-empty{margin:auto;color:#8a7b82;font:800 11px Arial,sans-serif;text-align:center}
+#commentOverlay .sf9-split-editor-panel{min-width:0;min-height:0;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+#commentOverlay .sf9-split-editor-heading{flex:0 0 auto;padding:11px 14px 8px;border-bottom:1px solid #f0e5ea;background:#fff}
+#commentOverlay .sf9-split-editor-heading b{display:block;font:900 12px Arial,sans-serif;color:#252126}
+#commentOverlay .sf9-split-editor-heading span{display:block;margin-top:2px;font:700 9px Arial,sans-serif;color:#86727b}
+#commentOverlay .sf9-split-editor-panel .modal-controls{flex:0 0 auto;padding:12px 14px 7px;background:#fff}
+#commentOverlay .sf9-split-editor-panel .standalone-comment-tools{flex:0 0 auto}
+#commentOverlay .sf9-split-editor-panel .modal-search-wrap{flex:0 0 auto}
+#commentOverlay .sf9-split-editor-panel #commentTabs{flex:0 0 auto;overflow-x:auto;white-space:nowrap}
+#commentOverlay .sf9-split-editor-panel #commentList{flex:1;min-height:120px;overflow:auto}
+#commentOverlay .sf9-split-editor-panel .standalone-comment-tools textarea{min-height:96px;max-height:150px}
+@media(max-width:820px){
+  #commentOverlay .modal.sf9-comment-split-modal{width:96vw;height:94vh;max-height:94vh}
+  #commentOverlay .sf9-split-comment-body{grid-template-columns:1fr;grid-template-rows:minmax(250px,42%) minmax(0,58%);overflow:hidden}
+  #commentOverlay .sf9-split-grade-panel{border-right:0;border-bottom:1px solid #eadce2;padding:10px}
+  #commentOverlay .sf9-snap-top{padding:9px 10px}
+  #commentOverlay .sf9-snap-name{font-size:13px}
+  #commentOverlay .sf9-snap-average{padding:7px 9px}
+  #commentOverlay .sf9-snap-average strong{font-size:21px}
+  #commentOverlay .sf9-snap-table td,#commentOverlay .sf9-snap-table th{padding:5px 4px}
+  #commentOverlay .sf9-split-editor-panel .standalone-comment-tools textarea{min-height:76px}
+}
+@media print{#commentOverlay{display:none!important}}
+
+</style>
+<script id="sf9SplitCommentEditorPatch">
+(function(){
+  'use strict';
+  const PATCH_ID='sf9SplitCommentEditorV1';
+  if(window[PATCH_ID])return;
+  window[PATCH_ID]=true;
+
+  const state={previewNeedsRefresh:false,installed:false};
+  const baseOpen=window.openCommentPicker;
+  const baseClose=window.closeCommentPicker;
+  const baseLoad=window.loadCurrentCommentIntoEditor;
+  const baseGenerate=window.generateAutoCommentForModal;
+  const baseSave=window.saveEditedComment;
+  const baseApply=window.applyComment;
+  const baseUndo=window.undoLastComment;
+  const fullRender=window.render;
+
+  function clean(v){return String(v==null?'':v).trim();}
+  function h(v){return clean(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+  function overlayOpen(){const o=document.getElementById('commentOverlay');return !!(o&&o.classList.contains('open'));}
+  function currentStudent(){
+    const sel=document.getElementById('modalStudent');
+    const id=sel&&sel.value;
+    try{return (DATA&&DATA.students||[]).find(function(s){return String(s.id)===String(id);})||null;}catch(e){return null;}
+  }
+  function currentTerm(){const el=document.getElementById('modalTerm');return (el&&/^(term1|term2|term3)$/.test(el.value))?el.value:'term1';}
+  function termLabel(term){return term==='term2'?'Term 2':term==='term3'?'Term 3':'Term 1';}
+  function numericOrDash(v){return clean(v)===''?'—':clean(v);}
+  function gradeObj(stu,key){
+    if(key==='mapeh'){
+      return {term1:computedMAPEH(stu,'term1'),term2:computedMAPEH(stu,'term2'),term3:computedMAPEH(stu,'term3')};
+    }
+    return (stu&&stu.grades&&stu.grades[key])||{};
+  }
+  function enabledMain(stu,key){
+    try{
+      if(key==='musicArts'||key==='peHealth')return typeof mainSubjectEnabled==='function'?mainSubjectEnabled(stu,'mapeh'):true;
+      return typeof mainSubjectEnabled==='function'?mainSubjectEnabled(stu,key):true;
+    }catch(e){return true;}
+  }
+  function labelFor(stu,key){
+    try{if(typeof sectionSubjectDisplayName==='function')return sectionSubjectDisplayName(stu,key);}catch(e){}
+    const map={filipino:'Filipino',english:'English',mathematics:'Mathematics',science:'Science',ap:'Araling Panlipunan',values:'Values / GMRC',tle:'TLE / EPP',mapeh:'MAPEH',musicArts:'Music and Arts',peHealth:'PE and Health'};
+    return map[key]||key;
+  }
+  function snapshotRows(stu){
+    const g=(typeof gradeNumberFromValue==='function'?gradeNumberFromValue(stu&&stu.grade):Number(stu&&stu.grade));
+    let defs;
+    if(g===2)defs=[['filipino',0],['english',0],['mathematics',0],['values',0],['ap',0]];
+    else if(g===3)defs=[['filipino',0],['english',0],['mathematics',0],['science',0],['values',0],['ap',0]];
+    else defs=[['filipino',0],['english',0],['mathematics',0],['science',0],['ap',0],['values',0],['tle',0],['mapeh',0],['musicArts',1],['peHealth',1]];
+    const rows=[];
+    defs.forEach(function(d){
+      const key=d[0]; if(!enabledMain(stu,key))return;
+      const gr=gradeObj(stu,key); let fin='';
+      try{fin=typeof finalGrade==='function'?finalGrade(gr):'';}catch(e){}
+      rows.push({label:labelFor(stu,key),sub:!!d[1],gr:gr,final:fin});
+    });
+    try{
+      const ekeys=typeof activeElectiveKeys==='function'?activeElectiveKeys(stu):[];
+      ekeys.forEach(function(key,idx){
+        const gr=gradeObj(stu,key);let fin='';try{fin=typeof finalGrade==='function'?finalGrade(gr):'';}catch(e){}
+        let label='Elective '+(idx+1);try{label=electiveSubjectName(stu,key)||label;}catch(e){}
+        rows.push({label:label,sub:false,gr:gr,final:fin,elective:true});
+      });
+    }catch(e){}
+    try{
+      const specials=typeof activeSpecialSubjects==='function'?activeSpecialSubjects(stu):(Array.isArray(stu&&stu.specialSubjects)?stu.specialSubjects:[]);
+      (specials||[]).forEach(function(sp){
+        const gr=(sp&&sp.grades)||{};let fin='';try{fin=typeof finalGrade==='function'?finalGrade(gr):'';}catch(e){}
+        rows.push({label:clean(sp&&sp.name)||'Additional Subject',sub:false,gr:gr,final:fin,special:true});
+      });
+    }catch(e){}
+    return rows;
+  }
+  function renderGradeSnapshot(){
+    const host=document.getElementById('sf9CommentGradeSnapshot');
+    if(!host)return;
+    const stu=currentStudent(); const term=currentTerm();
+    if(!stu){host.innerHTML='<div class="sf9-snap-empty">Select a learner to view grades.</div>';return;}
+    const rows=snapshotRows(stu);
+    let avg='';try{avg=typeof termAverageLocal==='function'?termAverageLocal(stu,term):'';}catch(e){}
+    let finalAvg='';try{finalAvg=typeof overallFinalAverage==='function'?overallFinalAverage(stu):'';}catch(e){}
+    const tClass={term1:'t1',term2:'t2',term3:'t3'}[term];
+    const body=rows.map(function(r){
+      return '<tr class="'+(r.sub?'is-sub ':'')+(r.elective?'is-elective ':'')+(r.special?'is-special ':'')+'">'+
+        '<td class="subj">'+(r.sub?'<span class="sub-arrow">↳</span>':'')+h(r.label)+'</td>'+
+        '<td class="t1 '+(term==='term1'?'is-current':'')+'">'+h(numericOrDash(r.gr.term1))+'</td>'+
+        '<td class="t2 '+(term==='term2'?'is-current':'')+'">'+h(numericOrDash(r.gr.term2))+'</td>'+
+        '<td class="t3 '+(term==='term3'?'is-current':'')+'">'+h(numericOrDash(r.gr.term3))+'</td>'+
+        '<td class="final">'+h(numericOrDash(r.final))+'</td></tr>';
+    }).join('');
+    host.innerHTML=
+      '<div class="sf9-snap-top">'+
+        '<div><div class="sf9-snap-kicker">GRADE SNAPSHOT</div><div class="sf9-snap-name">'+h(stu.name||'Learner')+'</div><div class="sf9-snap-meta">'+h((typeof gradeLabel==='function'?gradeLabel(stu.grade):('Grade '+clean(stu.grade)))+' • '+clean(stu.section))+'</div></div>'+
+        '<div class="sf9-snap-average"><small>'+h(termLabel(term))+' Average</small><strong>'+h(numericOrDash(avg))+'</strong></div>'+
+      '</div>'+
+      '<div class="sf9-snap-term-note">Comment being edited: <b>'+h(termLabel(term))+'</b></div>'+
+      '<div class="sf9-snap-table-wrap"><table class="sf9-snap-table"><thead><tr><th>Learning Area</th><th class="'+(term==='term1'?'is-current':'')+'">T1</th><th class="'+(term==='term2'?'is-current':'')+'">T2</th><th class="'+(term==='term3'?'is-current':'')+'">T3</th><th>Final</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+      '<div class="sf9-snap-foot"><span>Read-only grade view</span><span>General Average: <b>'+h(numericOrDash(finalAvg))+'</b></span></div>';
+    host.setAttribute('data-current-term',tClass);
+  }
+  function updateLanguageBadge(){
+    const el=document.getElementById('sf9SplitCommentLanguageBadge');if(!el)return;
+    let lang='en';try{lang=(typeof mrCommentLanguage==='function'?mrCommentLanguage():((typeof COMMENT_LANGUAGE!=='undefined'&&COMMENT_LANGUAGE==='tl')?'tl':'en'));}catch(e){}
+    el.textContent=lang==='tl'?'🇵🇭 Tagalog':'🇬🇧 English';
+  }
+  function ensureLayout(){
+    if(state.installed)return;
+    const overlay=document.getElementById('commentOverlay');
+    const modal=overlay&&overlay.querySelector('.modal');
+    if(!modal)return;
+    state.installed=true;
+    modal.classList.add('sf9-comment-split-modal');
+    const title=modal.querySelector('.modal-title');if(title)title.textContent='💬 Review Grades & Edit Teacher Comment';
+    const head=modal.querySelector('.modal-head');
+    if(head&&!document.getElementById('sf9SplitCommentLanguageBadge')){
+      const badge=document.createElement('span');badge.id='sf9SplitCommentLanguageBadge';badge.className='sf9-split-lang-badge';
+      const close=head.querySelector('.modal-close');head.insertBefore(badge,close||null);
+    }
+    const body=document.createElement('div');body.id='sf9SplitCommentBody';body.className='sf9-split-comment-body';
+    const left=document.createElement('section');left.className='sf9-split-grade-panel';left.innerHTML='<div id="sf9CommentGradeSnapshot"></div>';
+    const right=document.createElement('section');right.className='sf9-split-editor-panel';
+    right.innerHTML='<div class="sf9-split-editor-heading"><div><b>Comment Editor</b><span>Review the grades, then edit or choose a teacher comment.</span></div></div>';
+    ['.modal-controls','.standalone-comment-tools','.modal-search-wrap','#commentTabs','#commentList'].forEach(function(sel){const el=modal.querySelector(sel);if(el)right.appendChild(el);});
+    body.appendChild(left);body.appendChild(right);modal.appendChild(body);
+    const mt=document.getElementById('modalTerm');if(mt)mt.addEventListener('change',function(){setTimeout(function(){renderGradeSnapshot();updateLanguageBadge();},0);});
+    const ms=document.getElementById('modalStudent');if(ms)ms.addEventListener('change',function(){setTimeout(function(){renderGradeSnapshot();updateLanguageBadge();},0);});
+    renderGradeSnapshot();updateLanguageBadge();
+  }
+  function callWithoutFullPreview(fn,ctx,args){
+    if(typeof fn!=='function')return;
+    if(!overlayOpen())return fn.apply(ctx,args||[]);
+    const currentRender=window.render;
+    window.render=function(){state.previewNeedsRefresh=true;};
+    try{return fn.apply(ctx,args||[]);}finally{window.render=currentRender;state.previewNeedsRefresh=true;}
+  }
+  function refreshEditorOnly(){
+    try{renderGradeSnapshot();updateLanguageBadge();}catch(e){}
+  }
+
+  if(typeof baseOpen==='function')window.openCommentPicker=function(){
+    const r=baseOpen.apply(this,arguments);ensureLayout();renderGradeSnapshot();updateLanguageBadge();return r;
+  };
+  if(typeof baseClose==='function')window.closeCommentPicker=function(){
+    const r=baseClose.apply(this,arguments);
+    if(state.previewNeedsRefresh&&typeof fullRender==='function'){
+      state.previewNeedsRefresh=false;
+      requestAnimationFrame(function(){try{fullRender();}catch(e){}});
+    }
+    return r;
+  };
+
+  /* Learner switching inside Comment Editor is intentionally lightweight.
+     The large SF9 preview is refreshed only once when the editor is closed. */
+  window.syncToolbarStudentFromModal=function(){
+    const id=(document.getElementById('modalStudent')||{}).value;
+    try{
+      const idx=(typeof studentIndexById==='function')?studentIndexById(id):-1;
+      if(idx>=0&&typeof selectStudentByIndex==='function')selectStudentByIndex(idx,true);
+      else{
+        const top=document.getElementById('studentSelect');
+        if(top&&Array.prototype.some.call(top.options,function(o){return String(o.value)===String(id);})){top.value=id;}
+      }
+    }catch(e){}
+    state.previewNeedsRefresh=true;
+    try{if(typeof baseLoad==='function')baseLoad();}catch(e){}
+    refreshEditorOnly();
+  };
+
+  if(typeof baseLoad==='function')window.loadCurrentCommentIntoEditor=function(){const r=baseLoad.apply(this,arguments);refreshEditorOnly();return r;};
+  if(typeof baseGenerate==='function')window.generateAutoCommentForModal=function(){const r=callWithoutFullPreview(baseGenerate,this,arguments);refreshEditorOnly();return r;};
+  if(typeof baseSave==='function')window.saveEditedComment=function(){const r=callWithoutFullPreview(baseSave,this,arguments);refreshEditorOnly();return r;};
+  if(typeof baseApply==='function')window.applyComment=function(){const r=callWithoutFullPreview(baseApply,this,arguments);refreshEditorOnly();return r;};
+  if(typeof baseUndo==='function')window.undoLastComment=function(){const r=callWithoutFullPreview(baseUndo,this,arguments);refreshEditorOnly();return r;};
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureLayout,{once:true});else ensureLayout();
+})();
+
+</script>
+
+<script id="smartSf9SummaryPortScript">
+(function(){
+  var SUMMARY_FORM='term';
+  var SUMMARY_TERM='term1';
+  var SUMMARY_SECTION='';
+  var SUMMARY_EDITING=false;
+  var SUMMARY_FONT_SIZE=12;
+  var SUMMARY_ZOOM=90;
+  var SUMMARY_BOLD=false;
+
+  function q(id){return document.getElementById(id);}
+  function escS(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function clean(v){return String(v==null?'':v).trim();}
+  function sexGroup(stu){var s=clean(stu&&stu.sex).toUpperCase();if(s==='M'||s==='MALE')return 'MALE';if(s==='F'||s==='FEMALE')return 'FEMALE';return 'OTHER';}
+  function sectionKey(stu){return clean(stu&&stu.grade)+'|||'+clean(stu&&stu.section);}
+  function sectionLabelFromKey(key){var p=String(key||'').split('|||');return (p[0]?'Grade '+p[0]:'Grade')+(p[1]?' • '+p[1]:'');}
+  function sectionList(){
+    var seen={},out=[];
+    ((DATA&&DATA.students)||[]).forEach(function(s){var k=sectionKey(s);if(k==='|||')return;if(!seen[k]){seen[k]=1;out.push({key:k,label:sectionLabelFromKey(k)});}});
+    return out;
+  }
+  function studentsForSummary(){
+    var all=((DATA&&DATA.students)||[]);
+    if(!SUMMARY_SECTION&&all.length)SUMMARY_SECTION=sectionKey(all[0]);
+    return all.filter(function(s){return sectionKey(s)===SUMMARY_SECTION;});
+  }
+  function studentIndex(stu){return ((DATA&&DATA.students)||[]).indexOf(stu);}
+  function bySexGroups(students){
+    var groups={MALE:[],FEMALE:[],OTHER:[]};
+    students.forEach(function(s){groups[sexGroup(s)].push(s);});
+    return groups;
+  }
+  function numeric(v){var n=Number(v);return (v===''||v==null||!isFinite(n))?null:n;}
+  function rankMap(students,getter){
+    var scored=students.map(function(s,i){return {s:s,i:i,v:numeric(getter(s))};}).filter(function(x){return x.v!==null;});
+    scored.sort(function(a,b){return b.v-a.v;});
+    var map=new Map(),prev=null,rank=0;
+    scored.forEach(function(x,idx){if(prev===null||x.v!==prev)rank=idx+1;prev=x.v;map.set(x.s,rank);});
+    return map;
+  }
+  function subjectLabel(stu,key){
+    try{if(typeof sectionSubjectDisplayName==='function')return sectionSubjectDisplayName(stu,key);}catch(e){}
+    var labels={filipino:'Filipino',english:'English',mathematics:'Mathematics',science:'Science',ap:'AP',values:'GMRC / VE',tle:'EPP / TLE',mapeh:'MAPEH',musicArts:'M A',peHealth:'P E H',elective1:'Elective 1',elective2:'Elective 2'};
+    return labels[key]||key;
+  }
+  function termColumns(students){
+    if(!students.length)return [];
+    var rep=students[0],keys=[];
+    try{keys=(typeof requiredGradeKeys==='function'?requiredGradeKeys(rep):['filipino','english','mathematics','science','ap','values','tle','mapeh']).slice();}catch(e){keys=['filipino','english','mathematics','science','ap','values','tle','mapeh'];}
+    var cols=[];
+    keys.forEach(function(k){
+      if(k==='mapeh'){
+        cols.push({kind:'grade',key:'musicArts',label:'M A',group:'MAPEH'});
+        cols.push({kind:'grade',key:'peHealth',label:'P E H',group:'MAPEH'});
+      }else{
+        cols.push({kind:'grade',key:k,label:subjectLabel(rep,k)});
+      }
+    });
+    var names=[];
+    students.forEach(function(stu){(Array.isArray(stu.specialSubjects)?stu.specialSubjects:[]).forEach(function(sp){var n=clean(sp&&sp.name);if(n&&names.indexOf(n)<0)names.push(n);});});
+    names.forEach(function(n){cols.push({kind:'special',name:n,label:n});});
+    return cols;
+  }
+  function gradeValue(stu,col,term){
+    if(col.kind==='special'){
+      var sp=(Array.isArray(stu.specialSubjects)?stu.specialSubjects:[]).find(function(x){return clean(x&&x.name)===col.name;});
+      return sp&&sp.grades?sp.grades[term]:'';
+    }
+    if(col.key==='musicArts'||col.key==='peHealth')return ((((stu.grades||{})[col.key]||{})[term])??'');
+    if(col.key==='mapeh'){try{return computedMAPEH(stu,term);}catch(e){return '';}}
+    return ((((stu.grades||{})[col.key]||{})[term])??'');
+  }
+  function termAverage(stu,term){try{return termAverageLocal(stu,term);}catch(e){return '';}}
+  function finalAverage(stu){try{return overallFinalAverage(stu);}catch(e){return '';}}
+  function logoHtml(url,label){var u=clean(url);return u?'<img class="sum-logo" src="'+escS(u)+'" alt="'+escS(label)+'">':'<div class="sum-logo-placeholder">'+escS(label)+'</div>';}
+  function editSpan(value,kind,field,extra){return '<span class="sum-editable" data-sum-kind="'+escS(kind)+'" data-sum-field="'+escS(field)+'" '+(extra||'')+'>'+escS(value)+'</span>';}
+  function editCell(value,kind,field,extra,cls){return '<td class="sum-editable '+(cls||'')+'" data-sum-kind="'+escS(kind)+'" data-sum-field="'+escS(field)+'" '+(extra||'')+'>'+escS(value)+'</td>';}
+  function stuAttr(stu){return 'data-stu-idx="'+studentIndex(stu)+'"';}
+
+  function commonReferenceHeader(title,students){
+    var F=(DATA&&DATA.front)||{};
+    return '<div class="sum-ref-top">'+
+      '<div class="sum-ref-logo left">'+logoHtml(F.depedSealUrl,'SEAL')+'</div>'+
+      '<div class="sum-ref-center"><div class="sum-title">'+escS(title)+'</div></div>'+
+      '<div class="sum-ref-logo right">'+logoHtml(F.schoolLogoUrl,'LOGO')+'</div>'+
+    '</div>'+
+    '<div class="sum-ref-meta">'+
+      '<div class="sum-ref-meta-col">'+
+        '<div class="sum-meta-line"><b>REGION</b>'+editSpan(F.region||'','front','region')+'</div>'+
+        '<div class="sum-meta-line school-name"><b>SCHOOL NAME</b>'+editSpan(F.schoolName||'','front','schoolName')+'</div>'+
+      '</div>'+
+      '<div class="sum-ref-meta-col">'+
+        '<div class="sum-meta-line"><b>DIVISION</b>'+editSpan(F.division||'','front','division')+'</div>'+
+        '<div class="sum-meta-line"><b>SCHOOL ID</b>'+editSpan(F.schoolId||'','front','schoolId')+'</div>'+
+      '</div>'+
+      '<div class="sum-ref-meta-col right">'+
+        '<div class="sum-meta-line"><b>SCHOOL YEAR</b>'+editSpan(F.schoolYear||'','front','schoolYear')+'</div>'+
+      '</div>'+
+    '</div><div class="sum-blue-rule"></div>';
+  }
+  function classInfoTable(students,termLabel){
+    var F=(DATA&&DATA.front)||{},rep=students[0]||{},grade=clean(rep.grade),section=clean(rep.section);
+    if(termLabel){
+      return '<table class="sum-class-info sum-class-info-term"><colgroup><col style="width:297px"><col style="width:190px"><col style="width:232px"><col style="width:145px"><col></colgroup><tr><th class="sum-term-label" rowspan="2">'+escS(termLabel)+'</th><th class="sum-info-label">GRADE LEVEL</th><td class="sum-info-value">'+escS(grade)+'</td><th class="sum-adviser-label" rowspan="2">ADVISER</th><td class="sum-adviser-value" rowspan="2">'+editSpan(F.adviser||'','front','adviser')+'</td></tr><tr><th class="sum-info-label">SECTION</th><td class="sum-info-value">'+escS(section)+'</td></tr></table>';
+    }
+    return '';
+  }
+  function groupedRows(students,rowFn,colspan){
+    var g=bySexGroups(students),html='';
+    ['MALE','FEMALE','OTHER'].forEach(function(label){if(!g[label].length)return;html+='<tr class="sum-group"><td colspan="'+colspan+'">'+label+'</td></tr>';g[label].forEach(function(stu,i){html+=rowFn(stu,i+1);});});
+    return html;
+  }
+  function termSummaryHtml(students){
+    var term=SUMMARY_TERM,termWord={term1:'FIRST',term2:'SECOND',term3:'THIRD'}[term]||'TERM',termName=termWord+' TERM';
+    var cols=termColumns(students),ranks=rankMap(students,function(s){return termAverage(s,term);});
+    var total=6+cols.length+2;
+    var subjectTop='',subjectBottom='';
+    cols.forEach(function(c,i){
+      if(c.group==='MAPEH'){
+        if(i===0||cols[i-1].group!=='MAPEH')subjectTop+='<th colspan="2">MAPEH</th>';
+        subjectBottom+='<th>'+escS(c.label)+'</th>';
+      }else{
+        subjectTop+='<th rowspan="2">'+escS(c.label)+'</th>';
+      }
+    });
+    var thead='<tr><th rowspan="3" colspan="2" class="sum-learners-head">LEARNERS\' NAMES</th><th rowspan="3" class="sum-lrn">LRN</th><th rowspan="3" class="sum-dob">Date of Birth</th><th rowspan="3" class="sum-age">Age</th><th rowspan="3" class="sum-sex">Sex</th><th colspan="'+cols.length+'" class="sum-learning-head">Learning Areas</th><th rowspan="3" class="sum-final">Final Grade</th><th rowspan="3" class="sum-rank">Rank</th></tr>'+
+      '<tr>'+subjectTop+'</tr><tr>'+subjectBottom+'</tr>';
+    var body=groupedRows(students,function(stu,n){
+      var avg=termAverage(stu,term),rank=ranks.get(stu)||'',sa=stuAttr(stu);
+      var cells='<td class="sum-no">'+n+'</td>'+editCell(stu.name||'','student','name',sa,'sum-left sum-name')+editCell(stu.lrn||'','student','lrn',sa,'')+editCell(stu.birthDate||stu.dateOfBirth||stu.dob||'','student','birthDate',sa,'')+editCell(stu.age||'','student','age',sa,'')+editCell(stu.sex||'','student','sex',sa,'');
+      cols.forEach(function(c){
+        if(c.kind==='special')cells+=editCell(gradeValue(stu,c,term),'specialGrade','value',sa+' data-term="'+escS(term)+'" data-special="'+escS(c.name)+'"','');
+        else cells+=editCell(gradeValue(stu,c,term),'grade',c.key,sa+' data-term="'+escS(term)+'"','');
+      });
+      cells+='<td class="sum-bold sum-readonly">'+escS(avg)+'</td><td class="sum-readonly">'+escS(rank)+'</td>';
+      return '<tr>'+cells+'</tr>';
+    },total);
+    var termColgroup='<colgroup><col style="width:32px"><col style="width:265px"><col style="width:190px"><col style="width:95px"><col style="width:45px"><col style="width:46px">'+cols.map(function(){return '<col>';}).join('')+'<col style="width:78px"><col style="width:70px"></colgroup>';
+    var densityClass=cols.length>=11?' subjects-very-dense':(cols.length>=9?' subjects-dense':'');
+    return commonReferenceHeader('CLASS SUMMARY - '+termWord,students)+classInfoTable(students,termName)+'<table class="summary-table term-summary-table'+densityClass+'">'+termColgroup+'<thead>'+thead+'</thead><tbody>'+body+'</tbody></table>';
+  }
+
+  function learnerNamesHtml(students){
+    var F=(DATA&&DATA.front)||{},rep=students[0]||{},grade=clean(rep.grade),section=clean(rep.section),cols=6;
+    var body=groupedRows(students,function(stu,n){
+      var sa=stuAttr(stu);
+      return '<tr><td class="sum-no">'+n+'</td>'
+        +editCell(stu.name||'','student','name',sa,'sum-left sum-name')
+        +editCell(stu.lrn||'','student','lrn',sa,'')
+        +editCell(stu.birthDate||stu.dateOfBirth||stu.dob||'','student','birthDate',sa,'')
+        +editCell(stu.age||'','student','age',sa,'')
+        +editCell(stu.sex||'','student','sex',sa,'')+'</tr>';
+    },cols);
+    var info='<table class="sum-class-info"><tr><th class="sum-grade-label">GRADE LEVEL</th><td class="sum-info-value">'+escS(grade)+'</td><th class="sum-section-label">SECTION</th><td class="sum-info-value">'+escS(section)+'</td><th class="sum-adviser-label">ADVISER</th><td class="sum-adviser-value">'+editSpan(F.adviser||'','front','adviser')+'</td></tr></table>';
+    var head='<thead><tr><th colspan="2" class="sum-learners-head">LEARNERS\' NAMES</th><th>LRN</th><th>Date of Birth</th><th>Age</th><th>Sex</th></tr></thead>';
+    return commonReferenceHeader("LEARNERS' NAMES",students)+info+'<table class="summary-table names-summary-table"><colgroup><col style="width:36px"><col style="width:510px"><col style="width:260px"><col style="width:180px"><col style="width:90px"><col style="width:100px"></colgroup>'+head+'<tbody>'+body+'</tbody></table>';
+  }
+
+  function finalGradesHtml(students){
+    var F=(DATA&&DATA.front)||{},rep=students[0]||{},grade=clean(rep.grade),section=clean(rep.section),ranks=rankMap(students,finalAverage),cols=7;
+    var body=groupedRows(students,function(stu,n){
+      var a1=termAverage(stu,'term1'),a2=termAverage(stu,'term2'),a3=termAverage(stu,'term3'),fa=finalAverage(stu),sa=stuAttr(stu);
+      return '<tr><td class="sum-no">'+n+'</td>'+editCell(stu.name||'','student','name',sa,'sum-left')+'<td class="sum-readonly">'+escS(a1)+'</td><td class="sum-readonly">'+escS(a2)+'</td><td class="sum-readonly">'+escS(a3)+'</td><td class="sum-bold sum-readonly">'+escS(fa)+'</td><td class="sum-readonly">'+escS(ranks.get(stu)||'')+'</td></tr>';
+    },cols);
+    var head='<thead><tr><th colspan="2" rowspan="3" class="sum-learners-head">LEARNERS\' NAMES</th><th class="sum-grade-label">GRADE LEVEL</th><td colspan="2" class="sum-meta-value">'+escS(grade)+'</td><th class="sum-adviser-label" rowspan="2">ADVISER</th><td class="sum-adviser-value" rowspan="2">'+editSpan(F.adviser||'','front','adviser')+'</td></tr><tr><th class="sum-section-label">SECTION</th><td colspan="2" class="sum-meta-value">'+escS(section)+'</td></tr><tr><th class="sum-term-col">FIRST TERM</th><th class="sum-term-col">SECOND TERM</th><th class="sum-term-col">THIRD TERM</th><th class="sum-avg-col">AVERAGE</th><th class="sum-rank-col">RANK</th></tr></thead>';
+    return commonReferenceHeader('FINAL GRADES',students)+'<table class="summary-table final-summary-table"><colgroup><col style="width:34px"><col style="width:380px"><col style="width:170px"><col style="width:170px"><col style="width:170px"><col style="width:190px"><col style="width:190px"></colgroup>'+head+'<tbody>'+body+'</tbody></table>';
+  }
+  function attendanceHtmlSummary(students){
+    var F=(DATA&&DATA.front)||{},rep=students[0]||{},grade=clean(rep.grade),section=clean(rep.section);
+    var months=(typeof STANDALONE_MONTHS!=='undefined'?STANDALONE_MONTHS:[{key:'jun',label:'Jun'},{key:'jul',label:'Jul'},{key:'aug',label:'Aug'},{key:'sep',label:'Sep'},{key:'oct',label:'Oct'},{key:'nov',label:'Nov'},{key:'dec',label:'Dec'},{key:'jan',label:'Jan'},{key:'feb',label:'Feb'},{key:'mar',label:'Mar'},{key:'apr',label:'Apr'}]);
+    var cols=2+months.length;
+    var body=groupedRows(students,function(stu,n){
+      var a=stu.attendance||{},sa=stuAttr(stu),cells='<td class="sum-no">'+n+'</td>'+editCell(stu.name||'','student','name',sa,'sum-left');
+      months.forEach(function(m){cells+=editCell(a[m.key]??'','attendance',m.key,sa,'');});
+      return '<tr>'+cells+'</tr>';
+    },cols);
+    var monthHeads=months.map(function(m){return '<th class="sum-month">'+escS(String(m.label||'').slice(0,3).toUpperCase())+'</th>';}).join('');
+    var head='<thead><tr><th colspan="2" rowspan="3" class="sum-learners-head">LEARNERS\' NAMES</th><th colspan="2" class="sum-grade-label">GRADE LEVEL</th><td colspan="3" class="sum-meta-value">'+escS(grade)+'</td><th class="sum-adviser-label" rowspan="2">ADVISER</th><td colspan="5" rowspan="2" class="sum-adviser-value">'+editSpan(F.adviser||'','front','adviser')+'</td></tr><tr><th colspan="2" class="sum-section-label">SECTION</th><td colspan="3" class="sum-meta-value">'+escS(section)+'</td></tr><tr>'+monthHeads+'</tr></thead>';
+    var cd=(DATA&&DATA.classDays)||{},totalDays=months.reduce(function(s,m){var v=Number(cd[m.key]);return s+(isFinite(v)?v:0);},0);
+    var days='<table class="sum-days-table"><tr><th class="days-label" rowspan="2">TOTAL NUMBER OF<br>SCHOOL DAYS</th><th class="days-total-label">TOTAL</th>'+months.map(function(m){return '<th>'+escS(String(m.label||'').slice(0,3).toUpperCase())+'</th>';}).join('')+'</tr><tr><td class="days-total-val sum-readonly">'+escS(totalDays)+'</td>'+months.map(function(m){return editCell(cd[m.key]??'','classDay',m.key,'','');}).join('')+'</tr></table>';
+    return commonReferenceHeader('ATTENDANCE RECORD',students)+'<table class="summary-table attendance-summary-table attendance-paper-fit"><colgroup><col style="width:2.5%"><col style="width:22.5%">'+months.map(function(){return '<col style="width:6.818%">';}).join('')+'</colgroup>'+head+'<tbody>'+body+'</tbody></table>'+days;
+  }
+  function emptySummary(){return '<div class="summary-empty"><div>📑</div><b>No learners in this section yet.</b><span>Load or add learner data first, then return to Summary Forms.</span></div>';}
+
+  function setEditButtonState(){
+    var edit=q('summaryEditBtn'),save=q('summarySaveBtn'),cancel=q('summaryCancelBtn'),print=q('summaryPrintArea');
+    if(edit){edit.style.display=SUMMARY_EDITING?'none':'';}
+    if(save){save.style.display=SUMMARY_EDITING?'':'none';}
+    if(cancel){cancel.style.display=SUMMARY_EDITING?'':'none';}
+    if(print){print.classList.toggle('summary-editing',SUMMARY_EDITING);print.querySelectorAll('.sum-editable').forEach(function(el){if(SUMMARY_EDITING){el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');}else el.removeAttribute('contenteditable');});}
+  }
+
+  window.refreshSummaryForms=function(){
+    var sections=sectionList(),sel=q('summarySectionSelect');
+    if(!SUMMARY_SECTION&&sections.length)SUMMARY_SECTION=sections[0].key;
+    if(sections.length&&sections.every(function(x){return x.key!==SUMMARY_SECTION;}))SUMMARY_SECTION=sections[0].key;
+    if(sel){sel.innerHTML=sections.length?sections.map(function(x){return '<option value="'+escS(x.key)+'" '+(x.key===SUMMARY_SECTION?'selected':'')+'>'+escS(x.label)+'</option>';}).join(''):'<option value="">No section loaded</option>';}
+    var students=studentsForSummary(),print=q('summaryPrintArea');
+    if(print){
+      print.className='summary-sheet form-'+SUMMARY_FORM;
+      if(!students.length)print.innerHTML=emptySummary();else if(SUMMARY_FORM==='names')print.innerHTML=learnerNamesHtml(students);else if(SUMMARY_FORM==='final')print.innerHTML=finalGradesHtml(students);else if(SUMMARY_FORM==='attendance')print.innerHTML=attendanceHtmlSummary(students);else print.innerHTML=termSummaryHtml(students);
+      applySummaryDisplaySettings();
+    }
+    var term=q('summaryTermSelect');if(term){term.style.display=SUMMARY_FORM==='term'?'':'none';term.value=SUMMARY_TERM;}
+    ['summaryTabTerm','summaryTabNames','summaryTabFinal','summaryTabAttendance'].forEach(function(id){var e=q(id);if(e)e.classList.remove('active');});
+    var activeId=SUMMARY_FORM==='names'?'summaryTabNames':SUMMARY_FORM==='final'?'summaryTabFinal':SUMMARY_FORM==='attendance'?'summaryTabAttendance':'summaryTabTerm';if(q(activeId))q(activeId).classList.add('active');
+    var top=q('summaryTopSchool');if(top)top.textContent=((DATA&&DATA.front&&DATA.front.schoolName)||'Smart SF9');
+    setEditButtonState();
+  };
+
+  window.toggleSummaryEdit=function(){
+    if(!studentsForSummary().length)return alert('Load learner data first before editing a summary form.');
+    SUMMARY_EDITING=true;setEditButtonState();
+    var first=q('summaryPrintArea')&&q('summaryPrintArea').querySelector('.sum-editable');if(first)first.focus();
+  };
+  window.cancelSummaryEdits=function(){SUMMARY_EDITING=false;refreshSummaryForms();};
+
+  function valueFromEditable(el){return clean(el.textContent||'');}
+  function toStoredNumberOrText(v){if(v==='')return '';var n=Number(v);return isFinite(n)?n:v;}
+  window.saveSummaryEdits=function(){
+    var area=q('summaryPrintArea');if(!area)return;
+    var front=(DATA&&DATA.front)||(DATA.front={});
+    area.querySelectorAll('.sum-editable').forEach(function(el){
+      var kind=el.dataset.sumKind,field=el.dataset.sumField,val=valueFromEditable(el);
+      if(kind==='front'){front[field]=val;return;}
+      if(kind==='classDay'){if(!DATA.classDays)DATA.classDays={};DATA.classDays[field]=toStoredNumberOrText(val);return;}
+      var idx=Number(el.dataset.stuIdx);var stu=(DATA&&DATA.students||[])[idx];if(!stu)return;
+      if(kind==='student'){
+        if(field==='age')stu[field]=toStoredNumberOrText(val);else stu[field]=val;
+      }else if(kind==='grade'){
+        var term=el.dataset.term||SUMMARY_TERM;if(!stu.grades)stu.grades={};if(!stu.grades[field])stu.grades[field]={};stu.grades[field][term]=toStoredNumberOrText(val);
+      }else if(kind==='specialGrade'){
+        var t=el.dataset.term||SUMMARY_TERM,nm=el.dataset.special||'';if(!Array.isArray(stu.specialSubjects))stu.specialSubjects=[];
+        var sp=stu.specialSubjects.find(function(x){return clean(x&&x.name)===nm;});if(!sp){sp={name:nm,grades:{}};stu.specialSubjects.push(sp);}if(!sp.grades)sp.grades={};sp.grades[t]=toStoredNumberOrText(val);
+      }else if(kind==='attendance'){
+        if(!stu.attendance)stu.attendance={};stu.attendance[field]=toStoredNumberOrText(val);
+      }
+    });
+    try{if(typeof syncStudentMAPEH==='function')(DATA.students||[]).forEach(syncStudentMAPEH);}catch(e){}
+    try{if(typeof saveLocalData==='function')saveLocalData();}catch(e){}
+    try{if(typeof updateDashboardSummary==='function')updateDashboardSummary();}catch(e){}
+    try{if(typeof refreshHomeDashboard==='function')refreshHomeDashboard();}catch(e){}
+    SUMMARY_EDITING=false;refreshSummaryForms();
+    try{if(typeof showToast==='function')showToast('✅ Summary changes saved to Smart SF9 local data.');}catch(e){}
+  };
+
+  function leaveEditMode(){if(SUMMARY_EDITING){SUMMARY_EDITING=false;}}
+  window.setSummarySection=function(v){leaveEditMode();SUMMARY_SECTION=v||'';refreshSummaryForms();};
+  window.setSummaryForm=function(v){leaveEditMode();SUMMARY_FORM=v||'term';refreshSummaryForms();};
+  window.setSummaryTerm=function(v){leaveEditMode();SUMMARY_TERM=v||'term1';refreshSummaryForms();};
+  function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+  function applySummaryDisplaySettings(){
+    var area=q('summaryPrintArea');if(!area)return;
+    area.style.fontSize=SUMMARY_FONT_SIZE+'px';
+    area.style.zoom=(SUMMARY_ZOOM/100);
+    area.classList.toggle('summary-bold',!!SUMMARY_BOLD);
+    var fs=q('summaryFontSizeSelect');if(fs)fs.value=String(SUMMARY_FONT_SIZE);
+    var zv=q('summaryZoomValue');if(zv)zv.textContent=Math.round(SUMMARY_ZOOM)+'%';
+    var bb=q('summaryBoldBtn');if(bb){bb.classList.toggle('active',!!SUMMARY_BOLD);bb.setAttribute('aria-pressed',SUMMARY_BOLD?'true':'false');}
+  }
+  window.setSummaryFontSize=function(v){SUMMARY_FONT_SIZE=clamp(Number(v)||12,9,14);try{localStorage.setItem('smartSf9SummaryFontSize',SUMMARY_FONT_SIZE);}catch(e){}applySummaryDisplaySettings();};
+  window.toggleSummaryBold=function(){SUMMARY_BOLD=!SUMMARY_BOLD;try{localStorage.setItem('smartSf9SummaryBold',SUMMARY_BOLD?'1':'0');}catch(e){}applySummaryDisplaySettings();};
+  window.changeSummaryZoom=function(delta){SUMMARY_ZOOM=clamp((Number(SUMMARY_ZOOM)||90)+Number(delta||0),50,140);try{localStorage.setItem('smartSf9SummaryZoom',SUMMARY_ZOOM);}catch(e){}applySummaryDisplaySettings();};
+  window.fitSummaryZoom=function(){
+    var shell=document.querySelector('#summaryView .summary-preview-shell'),area=q('summaryPrintArea');if(!shell||!area)return;
+    var old=area.style.zoom;area.style.zoom=1;
+    var natural=area.offsetWidth||1480,available=Math.max(300,shell.clientWidth-36);
+    SUMMARY_ZOOM=clamp(Math.floor((available/natural)*100/5)*5,50,100);
+    area.style.zoom=old;try{localStorage.setItem('smartSf9SummaryZoom',SUMMARY_ZOOM);}catch(e){}applySummaryDisplaySettings();
+  };
+  window.updateSummaryPaper=function(){
+    var v=(q('summaryPaperSelect')||{}).value||'long';var size=v==='a4'?'A4 landscape':v==='letter'?'11in 8.5in':'13in 8.5in';
+    var st=q('summaryPageStyle');if(!st){st=document.createElement('style');st.id='summaryPageStyle';document.head.appendChild(st);}st.textContent='@media print{@page{size:'+size+';margin:7mm}}';
+  };
+  window.printSummaryForm=function(){if(SUMMARY_EDITING)return alert('Please Save Changes or Cancel editing before printing.');updateSummaryPaper();var area=q('summaryPrintArea'),oldZoom=area?area.style.zoom:'';if(area)area.style.zoom=1;document.body.classList.add('summary-printing');try{window.print();}finally{setTimeout(function(){document.body.classList.remove('summary-printing');if(area)area.style.zoom=oldZoom||SUMMARY_ZOOM/100;},100);}};
+
+  function hideSummary(){SUMMARY_EDITING=false;var s=q('summaryView');if(s)s.classList.add('hidden');var n=q('navSummary');if(n)n.classList.remove('active');}
+  function setSummaryNav(){['navHome','navImport','navEdit','navPreview','navSummary'].forEach(function(id){var e=q(id);if(e)e.classList.toggle('active',id==='navSummary');});}
+  var oldHome=window.showDashboardHome,oldImport=window.showImportView,oldEdit=window.showEditView;
+  if(typeof oldHome==='function')window.showDashboardHome=function(){var r=oldHome.apply(this,arguments);hideSummary();return r;};
+  if(typeof oldImport==='function')window.showImportView=function(){var r=oldImport.apply(this,arguments);hideSummary();return r;};
+  if(typeof oldEdit==='function')window.showEditView=function(){var r=oldEdit.apply(this,arguments);hideSummary();return r;};
+  window.showSummaryForms=function(){
+    if(typeof oldHome==='function')oldHome();
+    var h=q('homeView'),i=q('importView'),e=q('editView'),s=q('summaryView');
+    if(h)h.classList.add('hidden');if(i)i.classList.add('hidden');if(e)e.classList.add('hidden');if(s)s.classList.remove('hidden');
+    setSummaryNav();refreshSummaryForms();window.scrollTo(0,0);
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    try{var fs=Number(localStorage.getItem('smartSf9SummaryFontSize'));if(fs>=9&&fs<=14)SUMMARY_FONT_SIZE=fs;var zs=Number(localStorage.getItem('smartSf9SummaryZoom'));if(zs>=50&&zs<=140)SUMMARY_ZOOM=zs;SUMMARY_BOLD=localStorage.getItem('smartSf9SummaryBold')==='1';}catch(e){}
+    updateSummaryPaper();refreshSummaryForms();setTimeout(function(){if(!localStorage.getItem('smartSf9SummaryZoom'))fitSummaryZoom();else applySummaryDisplaySettings();},80);
+  });
+})();
+</script>
+<script id="smartSf9SummaryPortLogoSync">
+(function(){
+  var baseUploadLogo=window.uploadLogo;
+  function refreshSoon(){
+    var tries=0,t=setInterval(function(){
+      tries++;
+      try{if(typeof window.refreshSummaryForms==='function')window.refreshSummaryForms();}catch(e){}
+      if(tries>=10)clearInterval(t);
+    },120);
+  }
+  window.uploadSummaryLogo=function(input,key){
+    if(!input||!input.files||!input.files[0])return;
+    if(typeof baseUploadLogo==='function'){
+      baseUploadLogo.call(window,input,key);refreshSoon();return;
+    }
+    var reader=new FileReader(),file=input.files[0];
+    reader.onload=function(){
+      try{
+        if(!DATA.front)DATA.front={};
+        DATA.front[key]=reader.result;
+        if(typeof saveLocalData==='function')saveLocalData();
+        if(typeof render==='function')render();
+        if(typeof updateDashboardSummary==='function')updateDashboardSummary();
+        if(typeof window.refreshSummaryForms==='function')window.refreshSummaryForms();
+        if(typeof showToast==='function')showToast('✅ Logo updated.');
+      }catch(e){alert('Could not save the selected image.');}
+    };
+    reader.readAsDataURL(file);
+  };
+  if(typeof baseUploadLogo==='function'){
+    window.uploadLogo=function(input,key){var r=baseUploadLogo.apply(this,arguments);refreshSoon();return r;};
+  }
+})();
+</script>
+
+<script id="smartSf9PremiumIntegration2026">
+(function(){
+  'use strict';
+  function q(id){return document.getElementById(id);}
+  function safeData(){try{return (typeof DATA!=='undefined'&&DATA)?DATA:{front:{},students:[],classDays:{}};}catch(e){return {front:{},students:[],classDays:{}};}}
+  function allViews(){return ['homeView','importView','editView','summaryView','rankingView'].map(q).filter(Boolean);}
+  function hideCustomViews(){var h=q('homeView'),s=q('summaryView'),r=q('rankingView');if(h)h.classList.add('hidden');if(s)s.classList.add('hidden');if(r)r.classList.add('hidden');document.body.classList.remove('premium-home-active');}
+  function navState(id){
+    ['navHomePremium','navImport','navEdit','navPreview','navSummary','navRanking'].forEach(function(n){var e=q(n);if(e)e.classList.toggle('active',n===id);});
+    if(id!=='navEdit')document.querySelectorAll('.imported-data-subnav button').forEach(function(b){b.classList.remove('active');});
+  }
+
+  var oldImport=window.showImportView;
+  var oldEdit=window.showEditView;
+  var oldPreview=window.showSF9Workspace;
+
+  window.showDashboardHome=function(){
+    if(typeof oldImport==='function')oldImport();
+    allViews().forEach(function(v){v.classList.add('hidden');});
+    var h=q('homeView');if(h)h.classList.remove('hidden');
+    var dash=q('importDashboard');if(dash)dash.classList.remove('hidden');
+    document.body.classList.add('premium-home-active');
+    document.body.classList.remove('sf9-word-tools');
+    navState('navHomePremium');
+    refreshPremiumDashboard();
+    try{window.scrollTo(0,0);}catch(e){}
+  };
+
+  if(typeof oldImport==='function')window.showImportView=function(){
+    var r=oldImport.apply(this,arguments);hideCustomViews();var i=q('importView');if(i)i.classList.remove('hidden');navState('navImport');return r;
+  };
+  if(typeof oldEdit==='function')window.showEditView=function(){
+    var r=oldEdit.apply(this,arguments);hideCustomViews();var e=q('editView');if(e)e.classList.remove('hidden');navState('navEdit');return r;
+  };
+  if(typeof oldPreview==='function')window.showSF9Workspace=function(){
+    hideCustomViews();
+    document.body.classList.remove('premium-home-active','sf9-word-tools');
+    var r=oldPreview.apply(this,arguments);
+    navState('navPreview');
+    return r;
+  };
+
+  /* Premium dashboard -> Imported Data bridge.
+     Show the Edit view once, then switch the internal edit tab.
+     IMPORTANT: never click the sidebar button again from here, or it recurses. */
+  window.openImportedDataTab=function(tab){
+    tab=tab||'school';
+    if(typeof window.showEditView==='function')window.showEditView();
+    setTimeout(function(){
+      try{if(typeof window.setEditTab==='function')window.setEditTab(tab);}catch(e){}
+      try{if(typeof window.updateImportedDataNav==='function')window.updateImportedDataNav(tab);}catch(e){}
+    },0);
+  };
+
+  function hasAnyGrade(students){
+    return students.some(function(s){
+      var g=s&&s.grades||{};
+      return Object.keys(g).some(function(k){var x=g[k]||{};return ['term1','term2','term3'].some(function(t){return x[t]!==''&&x[t]!=null;});});
+    });
+  }
+  function hasAnyAttendance(students){
+    return students.some(function(s){var a=s&&s.attendance||{};return Object.keys(a).some(function(k){return a[k]!==''&&a[k]!=null;});});
+  }
+  function hasClassDays(d){return d&&Object.keys(d).some(function(k){return d[k]!==''&&d[k]!=null&&Number(d[k])!==0;});}
+  function hasSubjects(students){
+    if(!students.length)return false;
+    try{
+      if(typeof window.getSectionSubjectConfig==='function'){var cfg=window.getSectionSubjectConfig(students[0])||{};return Object.keys(cfg).length>0;}
+    }catch(e){}
+    return true;
+  }
+  window.refreshPremiumDashboard=function(){
+    var D=safeData(),F=D.front||{},students=D.students||[],first=students[0]||{};
+    var sectionCount={};students.forEach(function(s){sectionCount[String(s.grade||'')+'|||'+String(s.section||'')]=1;});
+    var sy=q('premiumHomeSY'),sec=q('premiumHomeSection'),cnt=q('premiumHomeLearners'),term=q('premiumHomeTerm');
+    if(sy)sy.textContent=F.schoolYear||'—';
+    if(sec)sec.textContent=(first.grade?('Grade '+first.grade):'Grade —')+(first.section?(' – '+first.section):'');
+    if(cnt)cnt.textContent=students.length;
+    var ts=q('printTermSelect'),tv=ts?ts.value:'term1',labels={term1:'Term 1',term2:'Term 2',term3:'Term 3',all:'Complete',template:'Template'};
+    if(term)term.textContent=labels[tv]||'Term 1';
+    var done={
+      template:!!(window.__sf9MasterTemplateDownloaded||students.length),
+      learners:students.length>0,
+      subjects:hasSubjects(students),
+      days:hasClassDays(D.classDays||{}),
+      grades:hasAnyGrade(students),
+      attendance:hasAnyAttendance(students),
+      sf9:students.length>0
+    };
+    document.querySelectorAll('#premiumProgressTrack .pstep').forEach(function(x){x.classList.toggle('done',!!done[x.dataset.step]);});
+  };
+
+  // Add / reorder sidebar navigation.
+  function installNav(){
+    var nav=document.querySelector('#importDashboard .dash-nav');if(!nav)return;
+    if(!q('navHomePremium')){
+      var home=document.createElement('button');home.id='navHomePremium';home.innerHTML='🏠 &nbsp;Dashboard<small>Workspace overview & quick actions</small>';home.onclick=window.showDashboardHome;nav.insertBefore(home,nav.firstChild);
+    }
+    var preview=q('navPreview');
+    if(preview&&!q('navSummary')){
+      var s=document.createElement('button');s.id='navSummary';s.className='premium-extra-nav';s.innerHTML='📑 &nbsp;Summary Forms<small>Term, names, final grades & attendance</small>';s.onclick=function(){window.showSummaryForms();};preview.insertAdjacentElement('afterend',s);
+    }
+    var sum=q('navSummary')||preview;
+    if(sum&&!q('navRanking')){
+      var r=document.createElement('button');r.id='navRanking';r.className='premium-extra-nav';r.innerHTML='🏆 &nbsp;Learner Ranking<small>Class standing & grade distribution</small>';r.onclick=function(){window.showLearnerRanking();};sum.insertAdjacentElement('afterend',r);
+    }
+  }
+
+  // Ranking
+  function sectionKey(s){return String((s&&s.grade)||'').trim()+'|||'+String((s&&s.section)||'').trim();}
+  function sectionLabel(k){var p=k.split('|||');return (p[0]?'Grade '+p[0]:'Grade')+(p[1]?' • '+p[1]:'');}
+  function rankSections(){var D=safeData(),seen={},out=[];(D.students||[]).forEach(function(s){var k=sectionKey(s);if(k==='|||')return;if(!seen[k]){seen[k]=1;out.push({key:k,label:sectionLabel(k)});}});return out;}
+  function avg(s,t){try{return t==='final'?(typeof overallFinalAverage==='function'?overallFinalAverage(s):''):(typeof termAverageLocal==='function'?termAverageLocal(s,t):'');}catch(e){return '';}}
+  window.refreshLearnerRanking=function(){
+    var D=safeData(),sections=rankSections(),sel=q('rankingSectionSelect'),term=(q('rankingTermSelect')||{}).value||'term1';
+    if(sel){
+      var current=sel.value;
+      sel.innerHTML=sections.length?sections.map(function(x){return '<option value="'+x.key.replace(/"/g,'&quot;')+'">'+x.label+'</option>';}).join(''):'<option value="">No section loaded</option>';
+      if(current&&sections.some(function(x){return x.key===current;}))sel.value=current;
+    }
+    var key=sel?sel.value:(sections[0]||{}).key||'',students=(D.students||[]).filter(function(s){return sectionKey(s)===key;});
+    var rows=students.map(function(s){var v=Number(avg(s,term));return {s:s,v:isFinite(v)?v:null};}).filter(function(x){return x.v!==null;}).sort(function(a,b){return b.v-a.v;});
+    var rank=0,prev=null;
+    var body=q('rankingBody');if(body){body.innerHTML=rows.length?rows.map(function(x,i){if(prev===null||x.v!==prev)rank=i+1;prev=x.v;return '<tr><td>'+rank+'</td><td>'+String(x.s.name||'').replace(/</g,'&lt;')+'</td><td>'+x.v.toFixed(2).replace(/\.00$/,'')+'</td></tr>';}).join(''):'<tr><td colspan="3" class="ranking-empty">No grades available for this selection.</td></tr>';}
+    var rc=q('rankingCount');if(rc)rc.textContent=students.length+' learner'+(students.length===1?'':'s');
+    var top=q('rankingTopSchool');if(top)top.textContent=(D.front&&D.front.schoolName)||'Smart SF9';
+    var ranges=[['90–100',90,100],['85–89',85,89.999],['80–84',80,84.999],['75–79',75,79.999],['Below 75',-999,74.999]],max=Math.max(1,rows.length),dist=q('rankingDistribution');
+    if(dist)dist.innerHTML=ranges.map(function(rg){var n=rows.filter(function(x){return x.v>=rg[1]&&x.v<=rg[2];}).length;return '<div class="dist-row"><b>'+rg[0]+'</b><div class="dist-bar"><i style="width:'+Math.round(n/max*100)+'%"></i></div><span>'+n+'</span></div>';}).join('');
+  };
+  window.showLearnerRanking=function(){
+    if(typeof oldImport==='function')oldImport();
+    allViews().forEach(function(v){v.classList.add('hidden');});var r=q('rankingView');if(r)r.classList.remove('hidden');
+    document.body.classList.remove('premium-home-active','sf9-word-tools');navState('navRanking');refreshLearnerRanking();try{window.scrollTo(0,0);}catch(e){}
+  };
+
+  // Clean navigation behavior for Summary Forms after the transplanted Premium summary script.
+  window.__installSummaryNavigation=function(){
+    var summaryFn=window.showSummaryForms;
+    // refreshSummaryForms is supplied by the Premium summary module; replace only navigation.
+    window.showSummaryForms=function(){
+      if(typeof oldImport==='function')oldImport();
+      allViews().forEach(function(v){v.classList.add('hidden');});var s=q('summaryView');if(s)s.classList.remove('hidden');
+      document.body.classList.remove('premium-home-active','sf9-word-tools');navState('navSummary');
+      if(typeof window.refreshSummaryForms==='function')window.refreshSummaryForms();
+      try{window.scrollTo(0,0);}catch(e){}
+    };
+  };
+
+  // Word-like right-side SF9 tools.
+  var wordReady=false;
+  function moveWithLabel(el,dest){
+    if(!el||!dest)return;
+    var prev=el.previousElementSibling;if(prev&&prev.classList&&prev.classList.contains('control-label'))dest.appendChild(prev);
+    dest.appendChild(el);
+  }
+  function findButtonContains(txt){
+    return Array.from(document.querySelectorAll('.toolbar button')).find(function(b){return String(b.getAttribute('onclick')||'').indexOf(txt)>=0;});
+  }
+  window.setWordToolTab=function(tab){
+    ['text','print','comments','more'].forEach(function(k){var b=q('wordTab-'+k),p=q('wordPanel-'+k);if(b)b.classList.toggle('active',k===tab);if(p)p.classList.toggle('active',k===tab);});
+  };
+  window.openWordSf9Panel=function(tab){
+    // Stable merge: keep the latest G2-10 SF9 preview/settings behavior intact for now.
+    document.body.classList.remove('sf9-word-tools');
+    if(typeof window.showSF9Workspace==='function')window.showSF9Workspace();
+  };
+  window.openSF9SettingsFromDashboard=function(){
+    if(typeof window.showSF9Workspace==='function')window.showSF9Workspace();
+    setTimeout(function(){
+      var b=document.getElementById('sf9SettingsButton');
+      if(b&&typeof b.click==='function')b.click();
+    },120);
+  };
+
+  window.setupWordTools=function(){
+    if(wordReady)return;
+    var toolbar=document.querySelector('.toolbar');if(!toolbar)return;
+    wordReady=true;
+    var wrap=document.createElement('div');wrap.id='wordToolsShell';wrap.innerHTML=''
+      +'<div class="word-tools-head"><div class="word-tools-title"><b>⚙ SF9 Tools</b><div><button type="button" onclick="showDashboardHome()">Dashboard</button> <button type="button" onclick="showEditView()">Edit Data</button></div></div><div class="word-tools-current"><label>Current Section</label><div id="wordSectionSlot"></div></div></div>'
+      +'<div class="word-tools-tabs"><button id="wordTab-text" onclick="setWordToolTab(\'text\')">🔤 Text & Layout</button><button id="wordTab-print" onclick="setWordToolTab(\'print\')">🖨 Printing</button><button id="wordTab-comments" onclick="setWordToolTab(\'comments\')">💬 Comments</button><button id="wordTab-more" onclick="setWordToolTab(\'more\')">⋯ More</button></div>'
+      +'<div class="word-tools-body"><div id="wordPanel-text" class="word-tool-panel"><div class="word-tool-card" id="wordAppearanceCard"><h4>Preview & Global Text</h4><p>Keep the SF9 visible while adjusting the overall look.</p></div><div class="word-tool-card" id="wordSelectedTextCard"><h4>Selected Text Formatting</h4><p>Turn on the text tool, then click the exact text in the SF9 preview.</p></div><div class="word-tool-card" id="wordSubjectCard"><h4>Subject & Header Position</h4><p>Adjust one subject row at a time without changing table borders.</p></div></div>'
+      +'<div id="wordPanel-print" class="word-tool-panel"><div class="word-tool-card" id="wordPrintCard"><h4>Print Setup</h4><p>Only printing options appear in this tab.</p></div><div class="word-tool-card" id="wordPrintActions"><h4>Print</h4></div></div>'
+      +'<div id="wordPanel-comments" class="word-tool-panel"><div class="word-tool-card" id="wordCommentsCard"><h4>Teacher Comments</h4><p>Choose the language and edit the current learner comment.</p></div></div>'
+      +'<div id="wordPanel-more" class="word-tool-panel"><div class="word-tool-card" id="wordBrandCard"><h4>Logo & Seal</h4></div><div class="word-tool-card" id="wordDataCard"><h4>Backup & Restore</h4></div></div></div>';
+    toolbar.insertBefore(wrap,toolbar.firstChild);
+
+    var section=q('sectionSelect'),slot=q('wordSectionSlot');if(section&&slot)slot.appendChild(section);
+
+    var appearance=q('wordAppearanceCard'),selected=q('wordSelectedTextCard'),subject=q('wordSubjectCard'),print=q('wordPrintCard'),pactions=q('wordPrintActions'),comments=q('wordCommentsCard'),brand=q('wordBrandCard'),data=q('wordDataCard');
+
+    var zoom=document.querySelector('#sf9SettingsAppearance .zoom-controls')||document.querySelector('.toolbar .zoom-controls');if(zoom)moveWithLabel(zoom,appearance);
+    moveWithLabel(q('sf9FontFamilySelect'),appearance);moveWithLabel(q('sf9FontSizeSelect'),appearance);
+    var reset=findButtonContains('resetSF9FontSettings');if(reset)appearance.appendChild(reset);
+
+    moveWithLabel(q('sf9TextSizeToolButton'),selected);var sw=q('sf9SelectedSizeWrap');if(sw)selected.appendChild(sw);
+
+    var il=q('sf9SubjectIndentControlLabel');if(il)subject.appendChild(il);
+    var ib=q('sf9SubjectIndentToolButton');if(ib)subject.appendChild(ib);
+    var iw=q('sf9SubjectIndentWrap');if(iw)subject.appendChild(iw);
+    var ga=q('sf9SubjectGradeAlignmentBlock');if(ga)subject.appendChild(ga);
+    var hh=q('editableHeaderHint');if(hh)subject.appendChild(hh);
+    var rh=q('resetHeaderTextButton');if(rh)subject.appendChild(rh);
+
+    moveWithLabel(q('printTermSelect'),print);moveWithLabel(q('paperSizeSelect'),print);moveWithLabel(q('printLayoutSelect'),print);moveWithLabel(q('attendancePrintSelect'),print);
+    var obl=q('sf9OuterBorderControlLabel');if(obl)print.appendChild(obl);var obs=q('sf9OuterBorderSelect');if(obs)print.appendChild(obs);var obn=q('sf9OuterBorderNote');if(obn)print.appendChild(obn);
+    var pc=findButtonContains('printSF9()');if(pc)pactions.appendChild(pc);var pa=findButtonContains('printAllInSection()');if(pa)pactions.appendChild(pa);
+
+    moveWithLabel(q('commentLanguageTop'),comments);var pick=findButtonContains('openCommentPicker');if(pick)comments.appendChild(pick);var undo=findButtonContains('undoLastComment');if(undo)comments.appendChild(undo);
+
+    var seal=findButtonContains("depedSealInput");if(seal)brand.appendChild(seal);var logo=findButtonContains("schoolLogoInput");if(logo)brand.appendChild(logo);
+    var exp=findButtonContains('exportBackup');if(exp)data.appendChild(exp);var restore=findButtonContains('backupRestoreInput');if(restore)data.appendChild(restore);
+
+    var oldPane=q('sf9SettingsPane');if(oldPane)oldPane.style.display='none';var oldBtn=q('sf9SettingsButton');if(oldBtn)oldBtn.style.display='none';
+    setWordToolTab('text');
+  };
+
+  function install(){
+    installNav();
+    if(typeof window.__installSummaryNavigation==='function')window.__installSummaryNavigation();
+    setTimeout(function(){refreshPremiumDashboard();},120);
+    // Latest version now opens to the requested Premium dashboard.
+    setTimeout(function(){window.showDashboardHome();},180);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
+
+
+<script id="smartSf9DashboardEntryPatch">
+(function(){
+  function install(){
+    var old=window.enterSmartSF9;
+    if(typeof old!=='function'||old.__premiumDashboardEntry)return;
+    function wrapped(){
+      var out=old.apply(this,arguments);
+      setTimeout(function(){if(typeof window.showDashboardHome==='function')window.showDashboardHome();},40);
+      return out;
+    }
+    wrapped.__premiumDashboardEntry=true;
+    wrapped.__original=old;
+    window.enterSmartSF9=wrapped;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(install,80);});
+  else setTimeout(install,80);
+})();
+</script>
+
+<script id="smartSf9StableMergeSafety">
+(function(){
+  try{if(typeof window.EDIT_TAB==='undefined')window.EDIT_TAB='school';}catch(e){}
+})();
+</script>
+<style id="smartSf9LeftWordStyleOverride">
+/* LEFT-SIDE organized SF9 tools: keep preview visible, show contextual tabs on the left. */
+body.sf9-word-tools .toolbar{
+  left:0!important;right:auto!important;width:310px!important;padding:0!important;
+  background:#f7f6f7!important;color:#211d20!important;border-right:1px solid #ddd4d8!important;border-left:0!important;
+  box-shadow:4px 0 18px rgba(0,0,0,.11)!important;overflow:hidden!important;gap:0!important
+}
+body.sf9-word-tools #app{margin-left:310px!important;margin-right:0!important;padding-top:58px!important}
+body.sf9-word-tools .hint{
+  margin-left:310px!important;margin-right:0!important;position:fixed!important;left:310px!important;right:0!important;
+  top:0!important;z-index:999!important;height:42px!important;padding:12px!important
+}
+body.sf9-word-tools .toolbar>button.back-dash,
+body.sf9-word-tools .toolbar>.titlebar,
+body.sf9-word-tools .toolbar>.mode-badge{display:none!important}
+@media(max-width:950px){
+  body.sf9-word-tools .toolbar{width:270px!important}
+  body.sf9-word-tools #app{margin-left:270px!important}
+  body.sf9-word-tools .hint{left:270px!important;margin-left:270px!important}
+}
+</style>
+<script id="smartSf9LeftWordToolsPatch">
+(function(){
+  function activateLeftSf9Tools(defaultTab){
+    try{
+      if(typeof window.setupWordTools==='function')window.setupWordTools();
+      document.body.classList.add('sf9-word-tools');
+      if(typeof window.setWordToolTab==='function')window.setWordToolTab(defaultTab||'text');
+    }catch(e){console.error('Left SF9 tools activation error',e);}
+  }
+  function install(){
+    var prev=window.showSF9Workspace;
+    if(typeof prev==='function' && !prev.__leftToolsWrapped){
+      window.showSF9Workspace=function(){
+        var out=prev.apply(this,arguments);
+        setTimeout(function(){activateLeftSf9Tools('text');},80);
+        return out;
+      };
+      window.showSF9Workspace.__leftToolsWrapped=true;
+    }
+    window.openWordSf9Panel=function(tab){
+      if(typeof window.showSF9Workspace==='function')window.showSF9Workspace();
+      setTimeout(function(){activateLeftSf9Tools(tab||'text');},100);
+    };
+    window.openSF9SettingsFromDashboard=function(){ window.openWordSf9Panel('text'); };
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);
+  else install();
+})();
+</script>
+
+
+<style id="smartSf9LeftToolsEnhancedDesign">
+/* Enhanced premium look for the left-side SF9 tools */
+body.sf9-word-tools .toolbar{
+  background:linear-gradient(180deg,#fffefe 0%,#fff7fb 30%,#f9f4f7 100%)!important;
+}
+body.sf9-word-tools .hint{
+  background:#fff7fb!important;
+  border-bottom:1px solid #ecd9e1!important;
+  color:#645760!important;
+  box-shadow:0 6px 14px rgba(64,24,40,.05)!important;
+}
+.word-tools-head{
+  background:linear-gradient(135deg,#18191d 0%,#2e2129 48%,#ef4b8b 140%)!important;
+  color:#fff!important;
+  padding:14px 14px 12px!important;
+  border-bottom:1px solid rgba(255,255,255,.12)!important;
+}
+.word-tools-title{align-items:flex-start!important}
+.word-tools-title b{
+  display:block!important;
+  font:900 15px/1.1 Arial,sans-serif!important;
+  letter-spacing:.3px!important;
+}
+.word-tools-subtitle{
+  display:block;
+  margin-top:4px;
+  font:600 10px/1.45 Arial,sans-serif;
+  color:rgba(255,255,255,.85);
+}
+.word-tools-title > div:last-child{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.word-tools-title button{
+  border-radius:999px!important;
+  background:rgba(255,255,255,.14)!important;
+  border:1px solid rgba(255,255,255,.24)!important;
+  padding:6px 10px!important;
+  font:800 9px Arial,sans-serif!important;
+}
+.word-tools-title button:hover{background:#fff!important;color:#1f1c1f!important}
+.word-tools-current{
+  margin-top:10px!important;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:14px;
+  padding:10px;
+}
+.word-tools-current label{font-size:8px!important;color:#ffd2e4!important}
+.word-tools-current select{
+  border:1px solid rgba(255,255,255,.2)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14);
+}
+.word-tools-tabs{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+  padding:10px!important;
+  background:#fff!important;
+  border-bottom:1px solid #e9dce2!important;
+  box-shadow:0 5px 10px rgba(64,24,40,.04);
+}
+.word-tools-tabs button{
+  min-height:38px!important;
+  border-radius:12px!important;
+  padding:8px 10px!important;
+  font:900 10px Arial,sans-serif!important;
+  letter-spacing:.15px;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
+}
+.word-tools-tabs button.active{
+  background:linear-gradient(135deg,#17191d 0%,#ef4b8b 100%)!important;
+  border-color:#d63d79!important;
+  color:#fff!important;
+  box-shadow:0 8px 16px rgba(239,75,139,.24)!important;
+}
+.word-tools-body{
+  height:calc(100vh - 172px)!important;
+  padding:12px!important;
+  background:linear-gradient(180deg,#fff8fb 0%,#f8f3f6 100%)!important;
+}
+.word-tool-panel.active{display:grid!important;gap:10px}
+.word-tool-card{
+  position:relative;
+  border-radius:16px!important;
+  border:1px solid #ead8e0!important;
+  padding:12px!important;
+  margin:0!important;
+  box-shadow:0 8px 20px rgba(64,24,40,.06)!important;
+  background:#fff!important;
+}
+.word-tool-card::before{
+  content:"";
+  position:absolute;left:0;top:0;right:0;height:4px;
+  border-radius:16px 16px 0 0;
+  background:linear-gradient(90deg,#17191d 0%,#ef4b8b 100%);
+}
+.word-tool-card h4{
+  font:900 11px Arial,sans-serif!important;
+  margin:2px 0 4px!important;
+  color:#241f22!important;
+  letter-spacing:.35px!important;
+}
+.word-tool-card p{
+  font:600 9px/1.5 Arial,sans-serif!important;
+  color:#7c6b74!important;
+  margin:0 0 9px!important;
+}
+.word-tool-card .control-label{
+  color:#ad2d61!important;
+  font:900 8px Arial,sans-serif!important;
+  margin:8px 1px 4px!important;
+}
+.word-tool-card select,
+.word-tool-card button{
+  min-height:37px!important;
+  border-radius:10px!important;
+  border:1px solid #e4d5dc!important;
+  box-shadow:none!important;
+}
+.word-tool-card select{padding:8px 10px!important}
+.word-tool-card button{
+  background:#fff!important;
+  color:#2d2428!important;
+  font:800 10px Arial,sans-serif!important;
+  transition:all .16s ease;
+}
+.word-tool-card button:hover{
+  transform:translateY(-1px);
+  border-color:#ef4b8b!important;
+  box-shadow:0 6px 12px rgba(239,75,139,.12)!important;
+}
+.word-tool-card .print-btn,
+.word-tool-card .batch-print-btn{
+  background:linear-gradient(135deg,#ef4b8b 0%,#f96aa2 100%)!important;
+  color:#fff!important;
+  border-color:#ef4b8b!important;
+  text-align:center!important;
+  box-shadow:0 8px 14px rgba(239,75,139,.18)!important;
+}
+.word-tool-card .batch-print-btn{background:linear-gradient(135deg,#17191d 0%,#37333a 100%)!important;border-color:#17191d!important}
+.word-tool-card .zoom-controls{
+  grid-template-columns:40px 1fr 40px 56px!important;
+  gap:6px!important;
+}
+.word-tool-card .zoom-value{
+  background:#fff6fa!important;
+  border-color:#ead7df!important;
+  color:#33292d!important;
+}
+#wordCommentsCard #sf9SettingsCommentsSmooth{
+  margin-top:10px!important;
+  padding-top:8px!important;
+  border-top:1px dashed #edd9e1!important;
+}
+#wordCommentsCard .sf9-nodup-row{display:grid!important;gap:8px!important}
+#wordCommentsCard #sf9NoDuplicateAutoCommentsSmooth,
+#wordCommentsCard .sf9-nodup-rebuild{width:100%!important}
+.word-mini-note{
+  display:block;
+  margin-top:6px;
+  padding:8px 10px;
+  border:1px dashed #e7d5dc;
+  border-radius:10px;
+  background:#fff9fc;
+  color:#7b6871;
+  font:700 9px/1.45 Arial,sans-serif;
+}
+@media(max-width:950px){
+  .word-tools-body{height:calc(100vh - 168px)!important}
+}
+</style>
+<script id="smartSf9LeftToolsEnhancedLogic">
+(function(){
+  function setText(el, html){ if(el) el.innerHTML = html; }
+  function ensureMiniNote(cardId, noteHtml){
+    var card=document.getElementById(cardId); if(!card) return;
+    var ex=card.querySelector('.word-mini-note'); if(ex) ex.remove();
+    var n=document.createElement('div'); n.className='word-mini-note'; n.innerHTML=noteHtml; card.appendChild(n);
+  }
+  function enhanceShell(){
+    var shell=document.getElementById('wordToolsShell');
+    if(!shell) return;
+
+    var title=document.querySelector('.word-tools-title b');
+    setText(title,'⚙ SMART SF9 Tools');
+    var titleWrap=title ? title.parentElement : null;
+    if(titleWrap && !titleWrap.querySelector('.word-tools-subtitle')){
+      var sub=document.createElement('span');
+      sub.className='word-tools-subtitle';
+      sub.textContent='Keep the SF9 preview visible while you organize formatting, printing, comments, and other tools.';
+      titleWrap.insertBefore(sub, title.nextSibling);
+    }
+
+    var currentLabel=document.querySelector('.word-tools-current label');
+    if(currentLabel) currentLabel.textContent='Current Grade & Section';
+
+    var tabs={
+      text:'✍️ Formatting',
+      print:'🖨️ Printing',
+      comments:'💬 Comments',
+      more:'🧰 More Tools'
+    };
+    Object.keys(tabs).forEach(function(k){
+      var b=document.getElementById('wordTab-'+k);
+      if(b) b.textContent=tabs[k];
+    });
+
+    setText(document.querySelector('#wordAppearanceCard h4'),'Preview & Global Formatting');
+    setText(document.querySelector('#wordAppearanceCard p'),'Adjust zoom, overall font style, and overall font size while keeping the SF9 preview visible.');
+    setText(document.querySelector('#wordSelectedTextCard h4'),'Exact Text Formatting');
+    setText(document.querySelector('#wordSelectedTextCard p'),'Click the text-format tool, then click the exact text inside the SF9 preview to adjust its size and style.');
+    setText(document.querySelector('#wordSubjectCard h4'),'Subject & Header Position');
+    setText(document.querySelector('#wordSubjectCard p'),'Move individual subject text or adjust editable header alignment without changing the table borders.');
+    setText(document.querySelector('#wordPrintCard h4'),'Print Setup');
+    setText(document.querySelector('#wordPrintCard p'),'Choose the term, paper size, print layout, attendance display, and border options before printing.');
+    setText(document.querySelector('#wordPrintActions h4'),'Print Actions');
+    setText(document.querySelector('#wordCommentsCard h4'),'Teacher Comments');
+    setText(document.querySelector('#wordCommentsCard p'),'Choose the comment language, open the comment picker, undo the last change, and manage unique auto comments.');
+    setText(document.querySelector('#wordBrandCard h4'),'Branding');
+    setText(document.querySelector('#wordBrandCard p'),'Upload or change the DepEd seal and school logo used in the SF9 preview and printout.');
+    setText(document.querySelector('#wordDataCard h4'),'Backup & Restore');
+    setText(document.querySelector('#wordDataCard p'),'Save a backup copy of your local data or restore a previously exported backup file.');
+
+    var commentsCard=document.getElementById('wordCommentsCard');
+    var smooth=document.getElementById('sf9SettingsCommentsSmooth');
+    if(commentsCard && smooth && !commentsCard.contains(smooth)) commentsCard.appendChild(smooth);
+
+    ensureMiniNote('wordPrintActions','<b>Tip:</b> Use <b>Print Current Learner</b> for checking one record first. Use <b>Print All in Section</b> only after your paper size and layout are final.');
+    ensureMiniNote('wordBrandCard','<b>Tip:</b> For best results, use clear square images for the school logo and a clean transparent DepEd seal.');
+    ensureMiniNote('wordDataCard','<b>Tip:</b> Export a backup before making big edits to grades, attendance, or imported learner data.');
+  }
+
+  function install(){
+    var original=window.setupWordTools;
+    if(typeof original==='function' && !original.__enhancedLeftDesign){
+      window.setupWordTools=function(){
+        var out=original.apply(this,arguments);
+        setTimeout(enhanceShell,50);
+        return out;
+      };
+      window.setupWordTools.__enhancedLeftDesign=true;
+    }
+    setTimeout(enhanceShell,120);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install);
+  else install();
+})();
+</script>
+
+
+<style id="smartSf9PremiumPolishFinal">
+/* ===== FINAL PREMIUM POLISH ===== */
+:root{
+  --sf9-pink:#ef4b8b;
+  --sf9-pink2:#ff78aa;
+  --sf9-ink:#17191d;
+  --sf9-soft:#fff5f9;
+  --sf9-line:#ead9e1;
+  --sf9-muted:#75666e;
+}
+
+/* Dashboard polish — screen only */
+@media screen{
+  #homeView.premium-home-view{
+    background:
+      radial-gradient(circle at 8% 15%,rgba(239,75,139,.08),transparent 22%),
+      radial-gradient(circle at 92% 35%,rgba(255,120,170,.06),transparent 25%),
+      linear-gradient(180deg,#fbfafb 0%,#f5f3f5 100%)!important;
+  }
+  .premium-home-header{
+    position:relative;
+    box-shadow:0 12px 28px rgba(20,15,18,.14)!important;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .premium-home-header:after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:4px;
+    background:linear-gradient(90deg,#17191d 0%,#ef4b8b 45%,#ff9fc5 70%,#17191d 100%);
+  }
+  .premium-info-strip{
+    margin:12px 20px 14px!important;
+    min-height:84px!important;
+    background:rgba(255,255,255,.92)!important;
+    border:1px solid #eadce2!important;
+    box-shadow:0 12px 28px rgba(44,26,34,.07)!important;
+    backdrop-filter:blur(8px);
+  }
+  .premium-info-item{padding:13px 22px!important;border-right:1px solid #efe2e7!important}
+  .pinfo-icon{
+    width:46px;height:46px;border-radius:14px;display:grid!important;place-items:center;
+    background:linear-gradient(145deg,#fff2f7,#ffe4ef);font-size:25px!important;filter:none!important;
+    box-shadow:inset 0 0 0 1px #f4cada;
+  }
+  .premium-info-item small{font:800 10px Arial,sans-serif!important;text-transform:uppercase;letter-spacing:.45px;color:#8a737e!important}
+  .premium-info-item b{font:900 18px Arial,sans-serif!important;color:#1d1a1c!important}
+  .premium-info-quote{font:italic 15px/1.45 Georgia,serif!important;color:#5a4851!important}
+
+  .premium-dashboard-grid{gap:14px!important;padding:0 20px!important}
+  .premium-feature-card{
+    min-height:222px!important;
+    border-radius:20px!important;
+    border:1px solid #e7dde1!important;
+    background:linear-gradient(180deg,#fff 0%,#fff 78%,#fff7fa 100%)!important;
+    box-shadow:0 9px 24px rgba(52,30,40,.055)!important;
+    padding:12px 12px 16px!important;
+  }
+  .premium-feature-card:before{
+    content:"";position:absolute;left:16px;right:16px;top:0;height:3px;border-radius:0 0 999px 999px;
+    background:linear-gradient(90deg,transparent,#ef4b8b,transparent);opacity:0;transition:.18s ease;
+  }
+  .premium-feature-card:hover{
+    transform:translateY(-4px)!important;
+    border-color:#ef9aba!important;
+    box-shadow:0 16px 32px rgba(55,29,41,.11)!important;
+  }
+  .premium-feature-card:hover:before{opacity:1}
+  .premium-feature-card.highlighted{
+    border:1.5px solid #ef4b8b!important;
+    background:linear-gradient(180deg,#fff 0%,#fff4f8 100%)!important;
+    box-shadow:0 12px 28px rgba(239,75,139,.12)!important;
+  }
+  .premium-feature-card img{width:126px!important;height:100px!important;margin:0 auto 4px!important}
+  .premium-feature-card h3{font:900 20px/1.06 Arial,sans-serif!important;letter-spacing:-.4px!important;margin:0 0 6px!important}
+  .premium-feature-card p{font:600 12px/1.35 Arial,sans-serif!important;color:#6e6268!important}
+  .premium-card-action{left:16px!important;right:16px!important;bottom:9px!important;padding:7px 10px!important;font-size:11px!important}
+
+  .premium-progress-strip{
+    margin:14px 20px 10px!important;
+    border:1px solid #eddbe3!important;
+    background:linear-gradient(90deg,#fff 0%,#fff4f8 50%,#fff 100%)!important;
+    box-shadow:0 9px 22px rgba(53,31,41,.05)!important;
+  }
+  .premium-progress-label{font-size:17px!important;color:#201c1e}.premium-progress-label span{color:#ef4b8b!important;font-size:34px!important}
+  .premium-progress-track:before{background:linear-gradient(90deg,#f6c0d4,#e9bbc9)!important}
+  .pstep i{width:29px!important;height:29px!important;border-color:#e9bacb!important;background:#fff!important}
+  .pstep.done i{background:linear-gradient(135deg,#ef4b8b,#ff78aa)!important;border-color:#ef4b8b!important;box-shadow:0 0 0 4px rgba(239,75,139,.08)!important}
+  .pstep b{font:800 11px Arial,sans-serif!important;color:#4c4146}
+
+  .premium-quick-actions{
+    margin:0 20px 10px!important;
+    border:1px solid #2d282c;
+    background:linear-gradient(105deg,#141519 0%,#242126 55%,#311d27 100%)!important;
+    box-shadow:0 14px 28px rgba(16,12,14,.16)!important;
+  }
+  .premium-quick-title>span{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(239,75,139,.16);font-size:25px!important}
+  .premium-quick-title b{font-size:17px!important}.premium-quick-title small{color:#cfc6ca!important}
+  .premium-quick-actions button{
+    min-height:48px!important;border-radius:14px!important;
+    background:linear-gradient(180deg,#fff,#fff3f8)!important;
+    box-shadow:0 6px 12px rgba(0,0,0,.12),inset 0 0 0 1px #efd4df!important;
+    font-size:12px!important;transition:.16s ease;
+  }
+  .premium-quick-actions button:hover{transform:translateY(-2px);box-shadow:0 10px 18px rgba(0,0,0,.16)!important}
+  .premium-home-footer{margin-top:2px;background:linear-gradient(90deg,#fff8fb,#fff,#fff5f9)!important;border-color:#ebdce2!important}
+
+  /* SF9 preview workspace — visual only, print layout untouched */
+  body.sf9-word-tools{background:#ece9eb!important}
+  body.sf9-word-tools #app{
+    background:
+      radial-gradient(circle at 20% 12%,rgba(239,75,139,.055),transparent 22%),
+      linear-gradient(135deg,#eee9ec 0%,#f7f5f6 52%,#ece8eb 100%)!important;
+    border-left:1px solid #e2d9dd;
+    min-height:100vh;
+  }
+  body.sf9-word-tools #app .paper{
+    border-radius:3px;
+    outline:1px solid rgba(57,43,49,.08);
+    box-shadow:0 18px 45px rgba(42,27,34,.20),0 2px 8px rgba(0,0,0,.06)!important;
+  }
+  body.sf9-word-tools .hint{
+    font:700 10px Arial,sans-serif!important;
+    color:#64555c!important;
+    background:rgba(255,250,252,.96)!important;
+  }
+
+  /* Left tool panel refinements */
+  body.sf9-word-tools .toolbar{width:300px!important}
+  body.sf9-word-tools #app{margin-left:300px!important}
+  body.sf9-word-tools .hint{left:300px!important;margin-left:300px!important}
+  .word-tools-head{padding:13px 13px 11px!important}
+  .word-tools-title b{font-size:14px!important}
+  .word-tools-subtitle{font-size:9px!important;line-height:1.35!important}
+  .word-tools-current{padding:9px!important;border-radius:12px!important}
+  .word-tools-tabs{gap:6px!important;padding:8px!important}
+  .word-tools-tabs button{min-height:35px!important;border-radius:10px!important;font-size:9px!important;padding:7px 6px!important}
+  .word-tools-body{height:calc(100vh - 162px)!important;padding:10px!important}
+  .word-tool-card{border-radius:14px!important;padding:11px!important}
+  .word-tool-card h4{font-size:10px!important}.word-tool-card p{font-size:8.5px!important}
+  .word-tool-card select,.word-tool-card button{min-height:34px!important;font-size:9.5px!important}
+}
+
+@media(max-width:950px){
+  body.sf9-word-tools .toolbar{width:265px!important}
+  body.sf9-word-tools #app{margin-left:265px!important}
+  body.sf9-word-tools .hint{left:265px!important;margin-left:265px!important}
+}
+</style>
+<script id="smartSf9PremiumPolishFinalLogic">
+(function(){
+  function q(id){return document.getElementById(id);}
+  function labelBefore(el,text){
+    if(!el)return;
+    var p=el.previousElementSibling;
+    if(p && p.classList && p.classList.contains('control-label')) p.textContent=text;
+  }
+  function appendInOrder(parent, items){
+    if(!parent)return;
+    items.forEach(function(el){if(el && parent.contains(el)) parent.appendChild(el);});
+  }
+  function movePair(parent,el,labelText){
+    if(!parent||!el)return;
+    var lab=el.previousElementSibling;
+    if(lab && lab.classList && lab.classList.contains('control-label')){
+      lab.textContent=labelText||lab.textContent;
+      parent.appendChild(lab);
+    }
+    parent.appendChild(el);
+  }
+  function shortenButton(btn,text){if(btn)btn.textContent=text;}
+  function findToolbarButton(token){
+    return Array.from(document.querySelectorAll('.toolbar button')).find(function(b){return String(b.getAttribute('onclick')||'').indexOf(token)>=0;});
+  }
+  function polishDashboardText(){
+    var cards=document.querySelectorAll('.premium-dashboard-grid .premium-feature-card');
+    cards.forEach(function(card){
+      var h=card.querySelector('h3'),p=card.querySelector('p');
+      if(!h||!p)return;
+      var title=h.textContent.trim();
+      var map={
+        'Master Template':'Download template, then upload and load your workbook.',
+        'Learners Info':'View and edit learner names, LRN, sex, and details.',
+        'Class Days':'Set school calendar and monthly class days.',
+        'Grades':'Encode and review grades for Terms 1–3.',
+        'Subject Selection':'Choose subjects, components, electives, and extras.',
+        'Attendance':'Encode monthly learner attendance.',
+        'SF9 Preview':'Preview, format, and print SF9 records.',
+        'Summary Forms':'Term summary, names, final grades, and attendance.',
+        'Learner Ranking':'View class ranking and grade distribution.',
+        'Settings':'Open SF9 formatting, printing, comments, and tools.'
+      };
+      if(map[title]) p.textContent=map[title];
+    });
+    var qt=document.querySelector('.premium-quick-title b');if(qt)qt.textContent='Quick Actions';
+    var qs=document.querySelector('.premium-quick-title small');if(qs)qs.textContent='Your most-used tasks.';
+  }
+  function organizeTools(){
+    var shell=q('wordToolsShell');if(!shell)return;
+
+    // Short tab labels.
+    var names={text:'✍ Format',print:'🖨 Print',comments:'💬 Comments',more:'🧰 More'};
+    Object.keys(names).forEach(function(k){var b=q('wordTab-'+k);if(b)b.textContent=names[k];});
+
+    var subtitle=shell.querySelector('.word-tools-subtitle');
+    if(subtitle)subtitle.textContent='Format and print while keeping the SF9 visible.';
+    var current=shell.querySelector('.word-tools-current label');if(current)current.textContent='Section';
+
+    var appearance=q('wordAppearanceCard'), selected=q('wordSelectedTextCard'), subject=q('wordSubjectCard');
+    var print=q('wordPrintCard'), actions=q('wordPrintActions'), comments=q('wordCommentsCard'), brand=q('wordBrandCard'), data=q('wordDataCard');
+
+    // Compact section titles/descriptions.
+    if(appearance){appearance.querySelector('h4').textContent='View & Font';appearance.querySelector('p').textContent='Zoom and overall SF9 text.';}
+    if(selected){selected.querySelector('h4').textContent='Selected Text';selected.querySelector('p').textContent='Select exact text in the preview, then format it.';}
+    if(subject){subject.querySelector('h4').textContent='Position';subject.querySelector('p').textContent='Move a subject or adjust editable headers.';}
+    if(print){print.querySelector('h4').textContent='Print Setup';print.querySelector('p').textContent='Choose only what is needed for printing.';}
+    if(actions){actions.querySelector('h4').textContent='Print';}
+    if(comments){comments.querySelector('h4').textContent='Comments';comments.querySelector('p').textContent='Language, comment picker, undo, and unique auto comments.';}
+    if(brand){brand.querySelector('h4').textContent='Logo & Seal';brand.querySelector('p').textContent='Update the images used on the SF9.';}
+    if(data){data.querySelector('h4').textContent='Backup';data.querySelector('p').textContent='Export or restore local data.';}
+
+    // FORMAT order: Zoom → Font → Size → Reset.
+    var zoom=appearance && appearance.querySelector('.zoom-controls');
+    var font=q('sf9FontFamilySelect'), size=q('sf9FontSizeSelect'), reset=findToolbarButton('resetSF9FontSettings');
+    if(appearance){
+      if(zoom){var zl=zoom.previousElementSibling;if(zl&&zl.classList.contains('control-label')){zl.textContent='Zoom';appearance.appendChild(zl);}appearance.appendChild(zoom);}
+      movePair(appearance,font,'Font');
+      movePair(appearance,size,'Size');
+      if(reset){reset.textContent='↶ Reset Font';appearance.appendChild(reset);}
+    }
+
+    // Selected text controls: Tool → status/selects/reset in their existing wrapper.
+    var textTool=q('sf9TextSizeToolButton');
+    if(textTool){shortenButton(textTool,'✍ Select Text');selected.appendChild(textTool);}
+    var sw=q('sf9SelectedSizeWrap');
+    if(sw){
+      var ss=q('sf9SelectedTextSizeSelect'), ws=q('sf9SelectedWeightSelect');
+      labelBefore(ss,'Text Size');labelBefore(ws,'Style');
+      var rb=Array.from(sw.querySelectorAll('button')).find(function(b){return /Reset/i.test(b.textContent);});if(rb)rb.textContent='↶ Reset Text';
+      selected.appendChild(sw);
+    }
+
+    // Position controls: selector/tool first, then extra alignment/header controls.
+    var ib=q('sf9SubjectIndentToolButton');if(ib){ib.textContent='↔ Select Subject';subject.appendChild(ib);}
+    var iw=q('sf9SubjectIndentWrap');if(iw){var isel=q('sf9SelectedSubjectIndentSelect');labelBefore(isel,'Position');var ir=Array.from(iw.querySelectorAll('button')).find(function(b){return /Reset/i.test(b.textContent);});if(ir)ir.textContent='↶ Reset Position';subject.appendChild(iw);}
+    var ga=q('sf9SubjectGradeAlignmentBlock');if(ga)subject.appendChild(ga);
+    var hh=q('editableHeaderHint');if(hh)subject.appendChild(hh);
+    var rh=q('resetHeaderTextButton');if(rh){rh.textContent='↶ Reset Headers';subject.appendChild(rh);}
+
+    // PRINT exact order: Term → Paper → Layout → Attendance → Border.
+    movePair(print,q('printTermSelect'),'Term');
+    movePair(print,q('paperSizeSelect'),'Paper');
+    movePair(print,q('printLayoutSelect'),'Layout');
+    movePair(print,q('attendancePrintSelect'),'Attendance');
+    var obs=q('sf9OuterBorderSelect');
+    if(obs){
+      var obl=q('sf9OuterBorderControlLabel');if(obl){obl.textContent='Border';print.appendChild(obl);}
+      print.appendChild(obs);var obn=q('sf9OuterBorderNote');if(obn)print.appendChild(obn);
+    }
+    var pc=findToolbarButton('printSF9()'), pa=findToolbarButton('printAllInSection()');
+    if(pc){pc.textContent='🖨 Print Current';actions.appendChild(pc);}
+    if(pa){pa.textContent='🗂 Print All';actions.appendChild(pa);}
+
+    // COMMENTS order: Language → Pick → Undo → Unique comments.
+    movePair(comments,q('commentLanguageTop'),'Language');
+    var pick=findToolbarButton('openCommentPicker'), undo=findToolbarButton('undoLastComment');
+    if(pick){pick.textContent='💬 Pick / Edit Comment';comments.appendChild(pick);}
+    if(undo){undo.textContent='↶ Undo Comment';comments.appendChild(undo);}
+    var smooth=q('sf9SettingsCommentsSmooth');if(smooth)comments.appendChild(smooth);
+
+    // MORE order: Seal → Logo → Export → Restore.
+    var seal=findToolbarButton('depedSealInput'), logo=findToolbarButton('schoolLogoInput');
+    if(seal){seal.textContent='🏛 DepEd Seal';brand.appendChild(seal);}
+    if(logo){logo.textContent='🏫 School Logo';brand.appendChild(logo);}
+    var exp=findToolbarButton('exportBackup'), restore=findToolbarButton('backupRestoreInput');
+    if(exp){exp.textContent='💾 Export Backup';data.appendChild(exp);}
+    if(restore){restore.textContent='📥 Restore Backup';data.appendChild(restore);}
+
+    // Shorter helper notes.
+    var notes=shell.querySelectorAll('.word-mini-note');
+    notes.forEach(function(n){
+      var txt=n.textContent||'';
+      if(/Print Current/i.test(txt))n.innerHTML='<b>Tip:</b> Check one learner first before printing the whole section.';
+      else if(/square images/i.test(txt))n.innerHTML='<b>Tip:</b> Use clear logo and seal images.';
+      else if(/Export a backup/i.test(txt))n.innerHTML='<b>Tip:</b> Back up before major edits.';
+    });
+  }
+  function install(){
+    polishDashboardText();
+    var original=window.setupWordTools;
+    if(typeof original==='function'&&!original.__premiumFinalOrder){
+      window.setupWordTools=function(){var r=original.apply(this,arguments);setTimeout(organizeTools,80);return r;};
+      window.setupWordTools.__premiumFinalOrder=true;
+    }
+    setTimeout(function(){polishDashboardText();organizeTools();},180);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
+
+
+<script id="smartSf9PremiumPolishMicroFix">
+(function(){
+  function q(id){return document.getElementById(id);}
+  function ensureLabel(el,text){
+    if(!el)return null;
+    var prev=el.previousElementSibling;
+    if(prev && prev.classList && prev.classList.contains('control-label')){prev.textContent=text;return prev;}
+    var lab=document.createElement('div');lab.className='control-label';lab.textContent=text;el.parentNode.insertBefore(lab,el);return lab;
+  }
+  function finish(){
+    var ss=q('sf9SelectedTextSizeSelect'), ws=q('sf9SelectedWeightSelect'), isel=q('sf9SelectedSubjectIndentSelect');
+    ensureLabel(ss,'Text Size');ensureLabel(ws,'Style');ensureLabel(isel,'Position');
+    ['wordPrintActions','wordBrandCard','wordDataCard'].forEach(function(id){
+      var card=q(id);if(!card)return;var note=card.querySelector('.word-mini-note');if(note)card.appendChild(note);
+    });
+    var status=q('sf9SelectedSizeStatus');if(status)status.textContent='Select a text item in the SF9 preview.';
+    var istatus=q('sf9SubjectIndentStatus');if(istatus)istatus.textContent='Select one subject in the SF9 preview.';
+  }
+  var old=window.setupWordTools;
+  if(typeof old==='function'&&!old.__microFixed){
+    window.setupWordTools=function(){var r=old.apply(this,arguments);setTimeout(finish,130);return r;};
+    window.setupWordTools.__microFixed=true;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(finish,300);});else setTimeout(finish,300);
+})();
+</script>
+
+
+<script id="smartSf9CompactLabelsAuthoritative">
+(function(){
+  function q(id){return document.getElementById(id);}
+  function setPrevLabel(id,text){
+    var el=q(id);if(!el)return;
+    var p=el.previousElementSibling;
+    if(p && p.classList && p.classList.contains('control-label'))p.textContent=text;
+  }
+  function setText(id,text){var el=q(id);if(el)el.textContent=text;}
+  function apply(){
+    var tabs={text:'✍ Format',print:'🖨 Print',comments:'💬 Comments',more:'🧰 More'};
+    Object.keys(tabs).forEach(function(k){setText('wordTab-'+k,tabs[k]);});
+    var current=document.querySelector('.word-tools-current label');if(current)current.textContent='Section';
+    setPrevLabel('sf9FontFamilySelect','Font');
+    setPrevLabel('sf9FontSizeSelect','Size');
+    setPrevLabel('sf9SelectedTextSizeSelect','Text Size');
+    setPrevLabel('sf9SelectedWeightSelect','Style');
+    setPrevLabel('sf9SelectedSubjectIndentSelect','Position');
+    setPrevLabel('printTermSelect','Term');
+    setPrevLabel('paperSizeSelect','Paper');
+    setPrevLabel('printLayoutSelect','Layout');
+    setPrevLabel('attendancePrintSelect','Attendance');
+    setPrevLabel('commentLanguageTop','Language');
+    var z=document.querySelector('#wordAppearanceCard .zoom-controls');
+    if(z){var zl=z.previousElementSibling;if(zl&&zl.classList.contains('control-label'))zl.textContent='Zoom';}
+    setText('sf9SubjectIndentControlLabel','Subject');
+    setText('sf9OuterBorderControlLabel','Border');
+    var b=q('sf9TextSizeToolButton');if(b)b.textContent='✍ Select Text';
+    b=q('sf9SubjectIndentToolButton');if(b)b.textContent='↔ Select Subject';
+    b=q('sf9ResetFontButton');if(b)b.textContent='↶ Reset Font';
+    b=q('resetHeaderTextButton');if(b)b.textContent='↶ Reset Headers';
+    var pick=Array.from(document.querySelectorAll('#wordCommentsCard button')).find(function(x){return /Pick|Change|Edit Comment/i.test(x.textContent);});if(pick)pick.textContent='💬 Pick / Edit';
+    var undo=Array.from(document.querySelectorAll('#wordCommentsCard button')).find(function(x){return /Undo/i.test(x.textContent);});if(undo)undo.textContent='↶ Undo';
+    var pc=Array.from(document.querySelectorAll('#wordPrintActions button')).find(function(x){return /Current/i.test(x.textContent);});if(pc)pc.textContent='🖨 Print Current';
+    var pa=Array.from(document.querySelectorAll('#wordPrintActions button')).find(function(x){return /All/i.test(x.textContent);});if(pa)pa.textContent='🗂 Print All';
+    var seal=Array.from(document.querySelectorAll('#wordBrandCard button')).find(function(x){return /Seal/i.test(x.textContent);});if(seal)seal.textContent='🏛 DepEd Seal';
+    var logo=Array.from(document.querySelectorAll('#wordBrandCard button')).find(function(x){return /Logo/i.test(x.textContent);});if(logo)logo.textContent='🏫 School Logo';
+    var exp=Array.from(document.querySelectorAll('#wordDataCard button')).find(function(x){return /Export/i.test(x.textContent);});if(exp)exp.textContent='💾 Export';
+    var res=Array.from(document.querySelectorAll('#wordDataCard button')).find(function(x){return /Restore/i.test(x.textContent);});if(res)res.textContent='📥 Restore';
+    var resetSel=Array.from(document.querySelectorAll('#sf9SelectedSizeWrap button')).find(function(x){return /Reset/i.test(x.textContent);});if(resetSel)resetSel.textContent='↶ Reset Text';
+    var resetPos=Array.from(document.querySelectorAll('#sf9SubjectIndentWrap button')).find(function(x){return /Reset/i.test(x.textContent);});if(resetPos)resetPos.textContent='↶ Reset Position';
+    var note=q('sf9OuterBorderNote');if(note)note.textContent='Outer SF9 frame only. Inner table borders stay unchanged.';
+  }
+  function install(){
+    [0,80,180,400,800].forEach(function(ms){setTimeout(apply,ms);});
+    var oldTab=window.setWordToolTab;
+    if(typeof oldTab==='function'&&!oldTab.__compactWrapped){
+      window.setWordToolTab=function(){var r=oldTab.apply(this,arguments);setTimeout(apply,0);return r;};
+      window.setWordToolTab.__compactWrapped=true;
+    }
+    var oldSetup=window.setupWordTools;
+    if(typeof oldSetup==='function'&&!oldSetup.__compactWrapped){
+      window.setupWordTools=function(){var r=oldSetup.apply(this,arguments);[50,150,350].forEach(function(ms){setTimeout(apply,ms);});return r;};
+      window.setupWordTools.__compactWrapped=true;
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
+
+
+<style id="smartSf9CommentBankRestoreStyles">
+#wordCommentsCard .comment-primary-btn{
+  background:linear-gradient(135deg,#17191d 0%,#353038 100%)!important;
+  color:#fff!important;
+  border-color:#17191d!important;
+  text-align:center!important;
+  box-shadow:0 7px 14px rgba(23,25,29,.13)!important;
+}
+#wordCommentsCard .comment-edit-btn{
+  background:linear-gradient(135deg,#ef4b8b 0%,#f96aa2 100%)!important;
+  color:#fff!important;
+  border-color:#ef4b8b!important;
+  text-align:center!important;
+  box-shadow:0 7px 14px rgba(239,75,139,.16)!important;
+}
+#wordCommentsCard .comment-helper{
+  margin:2px 0 8px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#fff7fb;
+  border:1px solid #edd8e1;
+  color:#76636d;
+  font:700 9px/1.45 Arial,sans-serif;
+}
+</style>
+<script id="smartSf9CommentBankRestoreLogic">
+(function(){
+  function q(id){return document.getElementById(id);}
+
+  window.openEditCurrentComment=function(){
+    if(typeof window.openCommentPicker==='function')window.openCommentPicker();
+    setTimeout(function(){
+      var title=document.querySelector('#commentOverlay .modal-title');
+      if(title)title.textContent='✏ Edit Teacher Comment';
+      var ed=q('currentCommentEditor');
+      if(ed){
+        try{ed.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+        ed.focus();
+        try{ed.setSelectionRange(ed.value.length,ed.value.length);}catch(e){}
+      }
+    },100);
+  };
+
+  window.openFullCommentBank=function(){
+    if(typeof window.openCommentPicker==='function')window.openCommentPicker();
+    setTimeout(function(){
+      var title=document.querySelector('#commentOverlay .modal-title');
+      if(title)title.textContent='💬 Teacher Comment Bank';
+      var search=q('commentSearch');
+      if(search){try{search.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){} search.focus();}
+    },100);
+  };
+
+  function restoreCommentsTab(){
+    var card=q('wordCommentsCard');if(!card)return;
+    var p=card.querySelector('p');if(p)p.textContent='Open the comment bank or edit the current learner comment.';
+
+    // Keep language first.
+    var lang=q('commentLanguageTop');
+    if(lang){
+      var lab=lang.previousElementSibling;
+      if(lab&&lab.classList&&lab.classList.contains('control-label')){lab.textContent='Language';card.appendChild(lab);}
+      card.appendChild(lang);
+    }
+
+    // Reuse the original comment-picker button as Comment Bank.
+    var bank=Array.from(document.querySelectorAll('.toolbar button,#wordCommentsCard button')).find(function(b){
+      return String(b.getAttribute('onclick')||'').indexOf('openCommentPicker')>=0 || /Pick \/ Edit|Pick \/ Change|Comment Bank/i.test(b.textContent||'');
+    });
+    if(bank){
+      bank.textContent='💬 Comment Bank';
+      bank.setAttribute('onclick','openFullCommentBank()');
+      bank.classList.add('comment-primary-btn');
+      card.appendChild(bank);
+    }
+
+    var edit=q('wordEditCommentBtn');
+    if(!edit){
+      edit=document.createElement('button');
+      edit.id='wordEditCommentBtn';
+      edit.type='button';
+      edit.className='comment-edit-btn';
+      edit.textContent='✏ Edit Comment';
+      edit.setAttribute('onclick','openEditCurrentComment()');
+    }
+    card.appendChild(edit);
+
+    var helper=q('wordCommentHelper');
+    if(!helper){
+      helper=document.createElement('div');
+      helper.id='wordCommentHelper';
+      helper.className='comment-helper';
+      helper.innerHTML='<b>Comment Bank</b> = choose/search saved comment options.<br><b>Edit Comment</b> = manually revise the current learner comment.';
+    }
+    card.appendChild(helper);
+
+    var undo=Array.from(document.querySelectorAll('.toolbar button,#wordCommentsCard button')).find(function(b){
+      return String(b.getAttribute('onclick')||'').indexOf('undoLastComment')>=0 || /^↶?\s*Undo/i.test(b.textContent||'');
+    });
+    if(undo){undo.textContent='↶ Undo';card.appendChild(undo);}
+
+    var smooth=q('sf9SettingsCommentsSmooth');if(smooth)card.appendChild(smooth);
+  }
+
+  // Restore the default bank title every time the regular picker is opened directly.
+  var originalOpen=window.openCommentPicker;
+  if(typeof originalOpen==='function'&&!originalOpen.__commentBankTitleWrapped){
+    window.openCommentPicker=function(){
+      var r=originalOpen.apply(this,arguments);
+      setTimeout(function(){var title=document.querySelector('#commentOverlay .modal-title');if(title)title.textContent='💬 Teacher Comment Bank';},0);
+      return r;
+    };
+    window.openCommentPicker.__commentBankTitleWrapped=true;
+  }
+
+  function install(){
+    [0,100,250,600].forEach(function(ms){setTimeout(restoreCommentsTab,ms);});
+    var oldSetup=window.setupWordTools;
+    if(typeof oldSetup==='function'&&!oldSetup.__commentBankRestored){
+      window.setupWordTools=function(){var r=oldSetup.apply(this,arguments);[50,180,400].forEach(function(ms){setTimeout(restoreCommentsTab,ms);});return r;};
+      window.setupWordTools.__commentBankRestored=true;
+    }
+    var oldTab=window.setWordToolTab;
+    if(typeof oldTab==='function'&&!oldTab.__commentBankRestored){
+      window.setWordToolTab=function(tab){var r=oldTab.apply(this,arguments);if(tab==='comments')setTimeout(restoreCommentsTab,0);return r;};
+      window.setWordToolTab.__commentBankRestored=true;
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
+
+</body>
+</html>
